@@ -7,13 +7,13 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('pagamentos', function (Blueprint $table) {
+        Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('atendimento_id')->nullable()->constrained('atendimentos')->onDelete('cascade');
-            $table->foreignId('sessao_id')->nullable()->constrained('sessoes')->onDelete('cascade');
-            $table->foreignId('paciente_id')->constrained('pacientes')->onDelete('cascade');
-            $table->foreignId('profissional_id')->constrained('profissionals')->onDelete('cascade');
-            $table->foreignId('fatura_id')->nullable()->constrained('faturas')->onDelete('set null');
+            $table->foreignId('attendance_id')->nullable()->constrained('attendances')->onDelete('cascade');
+            $table->foreignId('session_id')->nullable()->constrained('therapy_sessions')->onDelete('cascade');
+            $table->foreignId('patient_id')->constrained('patients')->onDelete('cascade');
+            $table->foreignId('professional_id')->constrained('professionals')->onDelete('cascade');
+            $table->foreignId('invoice_id')->nullable()->constrained('invoices')->onDelete('set null');
             $table->enum('metodo_pagamento', ['pix','dinheiro','cartao','transferencia']);
             $table->decimal('valor', 10, 2);
             $table->date('data_pagamento');
@@ -21,12 +21,12 @@ return new class extends Migration {
             $table->text('observacoes')->nullable();
             $table->timestamps();
 
-            $table->unique(['atendimento_id', 'data_pagamento']);
+            $table->unique(['attendance_id', 'data_pagamento']);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('pagamentos');
+        Schema::dropIfExists('payments');
     }
 };

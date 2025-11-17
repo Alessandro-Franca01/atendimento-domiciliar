@@ -7,14 +7,14 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::table('atendimentos', function (Blueprint $table) {
+        Schema::table('attendances', function (Blueprint $table) {
             $table->decimal('valor', 10, 2)->nullable()->after('data_realizacao');
         });
     }
 
     public function down(): void
     {
-        Schema::table('atendimentos', function (Blueprint $table) {
+        Schema::table('attendances', function (Blueprint $table) {
             $table->dropColumn('valor');
         });
     }

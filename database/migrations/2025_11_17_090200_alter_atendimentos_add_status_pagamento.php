@@ -7,14 +7,14 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::table('atendimentos', function (Blueprint $table) {
+        Schema::table('attendances', function (Blueprint $table) {
             $table->enum('status_pagamento', ['pendente','pago','pago_via_sessao','estornado'])->default('pendente')->after('status');
         });
     }
 
     public function down(): void
     {
-        Schema::table('atendimentos', function (Blueprint $table) {
+        Schema::table('attendances', function (Blueprint $table) {
             $table->dropColumn('status_pagamento');
         });
     }

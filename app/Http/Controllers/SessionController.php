@@ -9,7 +9,7 @@ use App\Models\SessionSchedule;
 use App\Services\AppointmentService;
 use Illuminate\Http\Request;
 
-class SessaoController extends Controller
+class SessionController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -48,23 +48,12 @@ class SessaoController extends Controller
             'desconto_percentual' => 'nullable|numeric|min:0|max:100',
             'data_inicio' => 'required|date',
             'data_fim_prevista' => 'nullable|date|after_or_equal:data_inicio',
+            'status' => 'required|in:ativo,inativo,concluido',
         ]);
 
-        $dados = $request->all();
-        if (!empty($dados['valor_por_sessao'])) {
-            $bruto = (float) $dados['total_sessoes'] * (float) $dados['valor_por_sessao'];
-            if (!empty($dados['desconto_valor']) && (float) $dados['desconto_valor'] > 0) {
-                $dados['valor_total'] = max(0, round($bruto - (float) $dados['desconto_valor'], 2));
-            } else {
-                $desconto = (float) ($dados['desconto_percentual'] ?? 0);
-                $fator = max(0, min(100, $desconto));
-                $dados['valor_total'] = round($bruto * (1 - ($fator / 100)), 2);
-            }
-        }
+        $session = Session::create($request->all());
 
-        $session = Session::create($dados);
-
-        return redirect()->route('sessions.show', $session)
+        return redirect()->route('sessions.index')
             ->with('success', 'Session created successfully.');
     }
 
@@ -73,7 +62,7 @@ class SessaoController extends Controller
      */
     public function show(Session $session)
     {
-        $session->load(['patient', 'professional', 'sessionSchedules.address', 'appointments']);
+        $session->load(['patient', 'professional', 'sessionSchedules', 'appointments']);
         return view('sessions.show', compact('session'));
     }
 
@@ -82,11 +71,6 @@ class SessaoController extends Controller
      */
     public function edit(Session $session)
     {
-        if ($session->status === 'concluido') {
-            return redirect()->route('sessions.show', $session)
-                ->with('error', 'Cannot edit a completed session.');
-        }
-
         $patients = Patient::where('status', 'ativo')->orderBy('nome')->get();
         $professionals = Professional::where('status', 'ativo')->orderBy('nome')->get();
 
@@ -98,11 +82,6 @@ class SessaoController extends Controller
      */
     public function update(Request $request, Session $session)
     {
-        if ($session->status === 'concluido') {
-            return redirect()->route('sessions.show', $session)
-                ->with('error', 'Cannot edit a completed session.');
-        }
-
         $request->validate([
             'patient_id' => 'required|exists:patients,id',
             'professional_id' => 'required|exists:professionals,id',
@@ -112,24 +91,12 @@ class SessaoController extends Controller
             'desconto_percentual' => 'nullable|numeric|min:0|max:100',
             'data_inicio' => 'required|date',
             'data_fim_prevista' => 'nullable|date|after_or_equal:data_inicio',
-            'status' => 'required|in:ativo,concluido,suspenso',
+            'status' => 'required|in:ativo,inativo,concluido',
         ]);
 
-        $dados = $request->all();
-        if (!empty($dados['valor_por_sessao'])) {
-            $bruto = (float) $dados['total_sessoes'] * (float) $dados['valor_por_sessao'];
-            if (!empty($dados['desconto_valor']) && (float) $dados['desconto_valor'] > 0) {
-                $dados['valor_total'] = max(0, round($bruto - (float) $dados['desconto_valor'], 2));
-            } else {
-                $desconto = (float) ($dados['desconto_percentual'] ?? 0);
-                $fator = max(0, min(100, $desconto));
-                $dados['valor_total'] = round($bruto * (1 - ($fator / 100)), 2);
-            }
-        }
+        $session->update($request->all());
 
-        $session->update($dados);
-
-        return redirect()->route('sessions.show', $session)
+        return redirect()->route('sessions.index')
             ->with('success', 'Session updated successfully.');
     }
 
@@ -139,7 +106,7 @@ class SessaoController extends Controller
     public function destroy(Session $session)
     {
         if ($session->appointments()->exists()) {
-            return redirect()->route('sessions.show', $session)
+            return redirect()->route('sessions.index')
                 ->with('error', 'Cannot delete session with appointments.');
         }
 
@@ -148,25 +115,3 @@ class SessaoController extends Controller
         return redirect()->route('sessions.index')
             ->with('success', 'Session deleted successfully.');
     }
-
-    /**
-     * Gera agendamentos automáticos para uma sessão
-     */
-    public function gerarAgendamentos(Session $session, Request $request)
-    {
-        if ($session->status !== 'ativo') {
-            return redirect()->route('sessions.show', $session)
-                ->with('error', 'Can only generate appointments for active sessions.');
-        }
-
-        $request->validate([
-            'dias' => 'required|integer|min:1|max:365',
-        ]);
-
-        $appointmentService = new AppointmentService();
-        $appointmentsCreated = $appointmentService->gerarAgendamentosAutomaticos($request->dias);
-
-        return redirect()->route('sessions.show', $session)
-            ->with('success', "{$appointmentsCreated} automatic appointments were created.");
-    }
-}
