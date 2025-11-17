@@ -16,7 +16,9 @@ class Sessao extends Model
         'sessoes_realizadas',
         'data_inicio',
         'data_fim_prevista',
-        'status'
+        'status',
+        'valor_total',
+        'valor_pago'
     ];
 
     protected $casts = [
@@ -44,6 +46,11 @@ class Sessao extends Model
         return $this->hasMany(Agendamento::class);
     }
 
+    public function pagamentos(): HasMany
+    {
+        return $this->hasMany(Pagamento::class);
+    }
+
     public function isCompleta(): bool
     {
         return $this->sessoes_realizadas >= $this->total_sessoes;
@@ -52,5 +59,12 @@ class Sessao extends Model
     public function getSessoesRestantesAttribute(): int
     {
         return max(0, $this->total_sessoes - $this->sessoes_realizadas);
+    }
+
+    public function getSaldoPagamentoAttribute(): float
+    {
+        $total = (float) ($this->valor_total ?? 0);
+        $pago = (float) ($this->valor_pago ?? 0);
+        return max(0.0, $total - $pago);
     }
 }

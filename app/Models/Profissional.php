@@ -34,4 +34,9 @@ class Profissional extends Model
     {
         return $this->hasMany(Atendimento::class);
     }
+
+    public function pagamentos(): HasMany
+    {
+        return $this->hasMany(Pagamento::class);
+    }
 }

@@ -34,4 +34,14 @@ class Paciente extends Model
     {
         return $this->hasMany(Atendimento::class);
     }
+
+    public function pagamentos(): HasMany
+    {
+        return $this->hasMany(Pagamento::class);
+    }
+
+    public function faturas(): HasMany
+    {
+        return $this->hasMany(Fatura::class);
+    }
 }

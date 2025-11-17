@@ -57,6 +57,22 @@
                             <li><a class="dropdown-item" href="{{ route('profissionals.create') }}">Novo Profissional</a></li>
                         </ul>
                     </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="financeiroDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-hand-holding-dollar"></i> Financeiro
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('pagamentos.index') }}">Pagamentos</a></li>
+                            <li><a class="dropdown-item" href="{{ route('pagamentos.create') }}">Registrar Pagamento</a></li>
+                            <li><a class="dropdown-item" href="{{ route('faturas.index') }}">Faturas</a></li>
+                            <li><a class="dropdown-item" href="{{ route('faturas.mensal.create') }}">Gerar Fatura Mensal</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ route('financeiro.fluxo-caixa') }}">Fluxo de Caixa</a></li>
+                            <li><a class="dropdown-item" href="{{ route('financeiro.relatorio-sessoes') }}">Relatório de Sessões</a></li>
+                            <li><a class="dropdown-item" href="{{ route('financeiro.relatorio-pacientes') }}">Relatório de Pacientes</a></li>
+                            <li><a class="dropdown-item" href="{{ route('financeiro.relatorio-geral') }}">Relatório Geral</a></li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>

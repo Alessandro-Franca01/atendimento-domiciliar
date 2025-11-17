@@ -15,7 +15,8 @@ class Atendimento extends Model
         'evolucao',
         'procedimento_realizado',
         'assinatura_paciente',
-        'status'
+        'status',
+        'status_pagamento'
     ];
 
     protected $casts = [
@@ -47,6 +48,10 @@ class Atendimento extends Model
             // Verificar se a sessão foi concluída
             if ($sessao->sessoes_realizadas >= $sessao->total_sessoes) {
                 $sessao->update(['status' => 'concluido']);
+            }
+
+            if (($sessao->valor_total ?? null) !== null && (float) ($sessao->saldo_pagamento ?? 0) === 0.0) {
+                $atendimento->update(['status_pagamento' => 'pago_via_sessao']);
             }
         });
     }
