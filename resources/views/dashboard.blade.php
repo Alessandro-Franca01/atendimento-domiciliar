@@ -10,7 +10,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h5 class="card-title">Total de Pacientes</h5>
-                        <h2 class="mb-0">{{ $totalPacientes }}</h2>
+                        <h2 class="mb-0">{{ $totalPatients }}</h2>
                     </div>
                     <i class="fas fa-users fa-2x"></i>
                 </div>
@@ -24,7 +24,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h5 class="card-title">Total de Sessões</h5>
-                        <h2 class="mb-0">{{ $totalSessoes }}</h2>
+                        <h2 class="mb-0">{{ $totalSessions }}</h2>
                     </div>
                     <i class="fas fa-calendar-check fa-2x"></i>
                 </div>
@@ -38,7 +38,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h5 class="card-title">Sessões Ativas</h5>
-                        <h2 class="mb-0">{{ $sessoesAtivas }}</h2>
+                        <h2 class="mb-0">{{ $activeSessions }}</h2>
                     </div>
                     <i class="fas fa-play-circle fa-2x"></i>
                 </div>
@@ -52,7 +52,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h5 class="card-title">Agendamentos Hoje</h5>
-                        <h2 class="mb-0">{{ $agendamentosHoje }}</h2>
+                        <h2 class="mb-0">{{ $appointmentsToday }}</h2>
                     </div>
                     <i class="fas fa-calendar-day fa-2x"></i>
                 </div>
@@ -70,7 +70,7 @@
                 </h5>
             </div>
             <div class="card-body">
-                @if($proximosAgendamentos->isEmpty())
+                @if($upcomingAppointments->isEmpty())
                     <p class="text-muted">Nenhum agendamento próximo.</p>
                 @else
                     <div class="table-responsive">
@@ -84,13 +84,13 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($proximosAgendamentos as $agendamento)
+                                @foreach($upcomingAppointments as $agendamento)
                                     <tr>
                                         <td>{{ $agendamento->data_hora_inicio->format('d/m/Y H:i') }}</td>
-                                        <td>{{ $agendamento->paciente->nome }}</td>
+                                        <td>{{ $agendamento->patient->nome }}</td>
                                         <td>
-                                            {{ $agendamento->endereco->logradouro }}, {{ $agendamento->endereco->numero }}
-                                            <br><small class="text-muted">{{ $agendamento->endereco->bairro }}</small>
+                                            {{ $agendamento->address->logradouro }}, {{ $agendamento->address->numero }}
+                                            <br><small class="text-muted">{{ $agendamento->address->bairro }}</small>
                                         </td>
                                         <td>
                                             @if($agendamento->status == 'confirmado')
@@ -119,15 +119,15 @@
                 </h5>
             </div>
             <div class="card-body">
-                @if($sessoesPertoDeTerminar->isEmpty())
+                @if($sessionsNearEnd->isEmpty())
                     <p class="text-muted">Nenhuma sessão próxima do fim.</p>
                 @else
                     <div class="list-group list-group-flush">
-                        @foreach($sessoesPertoDeTerminar as $sessao)
+                        @foreach($sessionsNearEnd as $sessao)
                             <div class="list-group-item">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
-                                        <h6 class="mb-1">{{ $sessao->paciente->nome }}</h6>
+                                        <h6 class="mb-1">{{ $sessao->patient->nome }}</h6>
                                         <p class="mb-1">{{ $sessao->descricao }}</p>
                                         <small class="text-muted">
                                             {{ $sessao->sessoes_realizadas }}/{{ $sessao->total_sessoes }} sessões

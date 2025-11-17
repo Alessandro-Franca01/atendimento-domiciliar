@@ -12,14 +12,17 @@ class Atendimento extends Model
         'profissional_id',
         'paciente_id',
         'data_realizacao',
+        'valor',
         'evolucao',
         'procedimento_realizado',
         'assinatura_paciente',
-        'status'
+        'status',
+        'status_pagamento'
     ];
 
     protected $casts = [
         'data_realizacao' => 'datetime',
+        'valor' => 'decimal:2',
     ];
 
     public function agendamento(): BelongsTo
@@ -47,6 +50,10 @@ class Atendimento extends Model
             // Verificar se a sessão foi concluída
             if ($sessao->sessoes_realizadas >= $sessao->total_sessoes) {
                 $sessao->update(['status' => 'concluido']);
+            }
+
+            if (($sessao->valor_total ?? null) !== null && (float) ($sessao->saldo_pagamento ?? 0) === 0.0) {
+                $atendimento->update(['status_pagamento' => 'pago_via_sessao']);
             }
         });
     }

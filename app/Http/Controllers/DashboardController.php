@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Agendamento;
-use App\Models\Paciente;
-use App\Models\Sessao;
+use App\Models\Appointment;
+use App\Models\Patient;
+use App\Models\Session;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -12,23 +12,23 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $totalPacientes = Paciente::count();
-        $totalSessoes = Sessao::count();
-        $sessoesAtivas = Sessao::where('status', 'ativo')->count();
+        $totalPatients = Patient::count();
+        $totalSessions = Session::count();
+        $activeSessions = Session::where('status', 'ativo')->count();
         
-        $hoje = Carbon::today();
-        $agendamentosHoje = Agendamento::whereDate('data_hora_inicio', $hoje)
+        $today = Carbon::today();
+        $appointmentsToday = Appointment::whereDate('data_hora_inicio', $today)
             ->whereIn('status', ['agendado', 'confirmado'])
             ->count();
 
-        $proximosAgendamentos = Agendamento::with(['paciente', 'endereco'])
-            ->where('data_hora_inicio', '>=', $hoje)
+        $upcomingAppointments = Appointment::with(['patient', 'address'])
+            ->where('data_hora_inicio', '>=', $today)
             ->whereIn('status', ['agendado', 'confirmado'])
             ->orderBy('data_hora_inicio')
             ->limit(10)
             ->get();
 
-        $sessoesPertoDeTerminar = Sessao::with('paciente')
+        $sessionsNearEnd = Session::with('patient')
             ->where('status', 'ativo')
             ->whereRaw('sessoes_realizadas >= total_sessoes - 2')
             ->orderBy('sessoes_realizadas', 'desc')
@@ -36,12 +36,12 @@ class DashboardController extends Controller
             ->get();
 
         return view('dashboard', compact(
-            'totalPacientes',
-            'totalSessoes',
-            'sessoesAtivas',
-            'agendamentosHoje',
-            'proximosAgendamentos',
-            'sessoesPertoDeTerminar'
+            'totalPatients',
+            'totalSessions',
+            'activeSessions',
+            'appointmentsToday',
+            'upcomingAppointments',
+            'sessionsNearEnd'
         ));
     }
 }

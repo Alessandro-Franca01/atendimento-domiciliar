@@ -6,11 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Sessao extends Model
+class Session extends Model
 {
+    protected $table = 'therapy_sessions';
+    
     protected $fillable = [
-        'paciente_id',
-        'profissional_id',
+        'patient_id',
+        'professional_id',
         'descricao',
         'total_sessoes',
         'valor_por_sessao',
@@ -34,29 +36,29 @@ class Sessao extends Model
         'desconto_valor' => 'decimal:2',
     ];
 
-    public function paciente(): BelongsTo
+    public function patient(): BelongsTo
     {
-        return $this->belongsTo(Paciente::class);
+        return $this->belongsTo(Patient::class);
     }
 
-    public function profissional(): BelongsTo
+    public function professional(): BelongsTo
     {
-        return $this->belongsTo(Profissional::class);
+        return $this->belongsTo(Professional::class);
     }
 
-    public function sessaoHorarios(): HasMany
+    public function sessionSchedules(): HasMany
     {
-        return $this->hasMany(SessaoHorario::class);
+        return $this->hasMany(SessionSchedule::class);
     }
 
-    public function agendamentos(): HasMany
+    public function appointments(): HasMany
     {
-        return $this->hasMany(Agendamento::class);
+        return $this->hasMany(Appointment::class);
     }
 
-    public function pagamentos(): HasMany
+    public function payments(): HasMany
     {
-        return $this->hasMany(Pagamento::class);
+        return $this->hasMany(Payment::class);
     }
 
     public function isCompleta(): bool
