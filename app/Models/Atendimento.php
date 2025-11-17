@@ -12,6 +12,7 @@ class Atendimento extends Model
         'profissional_id',
         'paciente_id',
         'data_realizacao',
+        'valor',
         'evolucao',
         'procedimento_realizado',
         'assinatura_paciente',
@@ -21,6 +22,7 @@ class Atendimento extends Model
 
     protected $casts = [
         'data_realizacao' => 'datetime',
+        'valor' => 'decimal:2',
     ];
 
     public function agendamento(): BelongsTo

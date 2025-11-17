@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Atendimento;
+use App\Models\Agendamento;
+use App\Models\Paciente;
+use App\Models\Profissional;
 
 class AtendimentoController extends Controller
 {
@@ -11,7 +15,8 @@ class AtendimentoController extends Controller
      */
     public function index()
     {
-        //
+        $atendimentos = Atendimento::with(['paciente','profissional','agendamento'])->latest()->paginate(15);
+        return view('atendimentos.index', compact('atendimentos'));
     }
 
     /**
@@ -19,7 +24,10 @@ class AtendimentoController extends Controller
      */
     public function create()
     {
-        //
+        $pacientes = Paciente::where('status','ativo')->get();
+        $profissionals = Profissional::where('status','ativo')->get();
+        $agendamentos = Agendamento::latest()->get();
+        return view('atendimentos.create', compact('pacientes','profissionals','agendamentos'));
     }
 
     /**
@@ -27,7 +35,20 @@ class AtendimentoController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $data = $request->validate([
+            'paciente_id' => ['required','exists:pacientes,id'],
+            'profissional_id' => ['required','exists:profissionals,id'],
+            'agendamento_id' => ['nullable','exists:agendamentos,id'],
+            'data_realizacao' => ['required','date'],
+            'valor' => ['nullable','numeric','min:0'],
+            'procedimento_realizado' => ['nullable','string'],
+            'evolucao' => ['nullable','string'],
+            'assinatura_paciente' => ['nullable','string'],
+            'status' => ['required','in:concluido,interrompido'],
+        ]);
+
+        $atendimento = Atendimento::create($data);
+        return redirect()->route('atendimentos.index')->with('success','Atendimento registrado.');
     }
 
     /**
@@ -35,7 +56,8 @@ class AtendimentoController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $atendimento = Atendimento::with(['paciente','profissional','agendamento'])->findOrFail($id);
+        return view('atendimentos.show', compact('atendimento'));
     }
 
     /**
@@ -43,7 +65,11 @@ class AtendimentoController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $atendimento = Atendimento::findOrFail($id);
+        $pacientes = Paciente::where('status','ativo')->get();
+        $profissionals = Profissional::where('status','ativo')->get();
+        $agendamentos = Agendamento::latest()->get();
+        return view('atendimentos.edit', compact('atendimento','pacientes','profissionals','agendamentos'));
     }
 
     /**
@@ -51,7 +77,21 @@ class AtendimentoController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $data = $request->validate([
+            'paciente_id' => ['required','exists:pacientes,id'],
+            'profissional_id' => ['required','exists:profissionals,id'],
+            'agendamento_id' => ['nullable','exists:agendamentos,id'],
+            'data_realizacao' => ['required','date'],
+            'valor' => ['nullable','numeric','min:0'],
+            'procedimento_realizado' => ['nullable','string'],
+            'evolucao' => ['nullable','string'],
+            'assinatura_paciente' => ['nullable','string'],
+            'status' => ['required','in:concluido,interrompido'],
+        ]);
+
+        $atendimento = Atendimento::findOrFail($id);
+        $atendimento->update($data);
+        return redirect()->route('atendimentos.show', $atendimento)->with('success','Atendimento atualizado.');
     }
 
     /**
@@ -59,6 +99,8 @@ class AtendimentoController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $atendimento = Atendimento::findOrFail($id);
+        $atendimento->delete();
+        return redirect()->route('atendimentos.index')->with('success','Atendimento excluído.');
     }
 }

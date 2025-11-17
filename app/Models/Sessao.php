@@ -13,6 +13,9 @@ class Sessao extends Model
         'profissional_id',
         'descricao',
         'total_sessoes',
+        'valor_por_sessao',
+        'desconto_percentual',
+        'desconto_valor',
         'sessoes_realizadas',
         'data_inicio',
         'data_fim_prevista',
@@ -24,6 +27,11 @@ class Sessao extends Model
     protected $casts = [
         'data_inicio' => 'date',
         'data_fim_prevista' => 'date',
+        'valor_total' => 'decimal:2',
+        'valor_pago' => 'decimal:2',
+        'valor_por_sessao' => 'decimal:2',
+        'desconto_percentual' => 'decimal:2',
+        'desconto_valor' => 'decimal:2',
     ];
 
     public function paciente(): BelongsTo
