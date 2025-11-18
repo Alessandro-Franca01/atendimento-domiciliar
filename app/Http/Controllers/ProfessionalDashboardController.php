@@ -13,12 +13,6 @@ use Illuminate\Support\Facades\Auth;
 
 class ProfessionalDashboardController extends Controller
 {
-    public function __construct()
-    {
-        //TODO: Corrigir esse erro
-        $this->middleware('auth:professional');
-    }
-
     public function index()
     {
         $professional = Auth::guard('professional')->user();
@@ -27,7 +21,7 @@ class ProfessionalDashboardController extends Controller
         $totalPatients = Patient::whereHas('sessions', function($query) use ($professional) {
             $query->where('professional_id', $professional->id);
         })->count();
-        dd($totalPatients);
+
         $totalSessions = Session::where('professional_id', $professional->id)->count();
         $activeSessions = Session::where('professional_id', $professional->id)
             ->where('status', 'ativo')

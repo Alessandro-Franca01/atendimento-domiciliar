@@ -44,12 +44,12 @@ class Professional extends Authenticatable
 
     public function getAuthIdentifierName()
     {
-        return 'email';
+        return 'id';
     }
 
     public function getAuthIdentifier()
     {
-        return $this->email;
+        return $this->id;
     }
 
     public function sessions(): HasMany
