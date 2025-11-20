@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Appointment;
-use App\Models\Attendance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -19,8 +18,8 @@ class ProfessionalAppointmentController extends Controller
     {
         $professional = Auth::guard('professional')->user();
         
-        $appointments = Appointment::with(['patient', 'address', 'session'])
-            ->whereHas('session', function($query) use ($professional) {
+        $appointments = Appointment::with(['patient', 'address', 'therapySession'])
+            ->whereHas('therapySession', function($query) use ($professional) {
                 $query->where('professional_id', $professional->id);
             })
             ->orderBy('data_hora_inicio', 'desc')
@@ -33,8 +32,8 @@ class ProfessionalAppointmentController extends Controller
     {
         $professional = Auth::guard('professional')->user();
         
-        $appointments = Appointment::with(['patient', 'session'])
-            ->whereHas('session', function($query) use ($professional) {
+        $appointments = Appointment::with(['patient', 'therapySession'])
+            ->whereHas('therapySession', function($query) use ($professional) {
                 $query->where('professional_id', $professional->id);
             })
             ->whereMonth('data_hora_inicio', Carbon::now()->month)
@@ -48,12 +47,11 @@ class ProfessionalAppointmentController extends Controller
     {
         $professional = Auth::guard('professional')->user();
         
-        // Verificar se o agendamento pertence ao profissional
-        if ($appointment->session->professional_id !== $professional->id) {
+        if ($appointment->therapySession->professional_id !== $professional->id) {
             abort(403);
         }
 
-        $appointment->load(['patient.addresses', 'address', 'session', 'attendance']);
+        $appointment->load(['patient.addresses', 'address', 'therapySession', 'attendance']);
 
         return view('professional.appointments.show', compact('appointment'));
     }
@@ -62,11 +60,11 @@ class ProfessionalAppointmentController extends Controller
     {
         $professional = Auth::guard('professional')->user();
         
-        if ($appointment->session->professional_id !== $professional->id) {
+        if ($appointment->therapySession->professional_id !== $professional->id) {
             abort(403);
         }
 
-        $appointment->load(['patient.addresses', 'session']);
+        $appointment->load(['patient.addresses', 'therapySession']);
 
         return view('professional.appointments.edit', compact('appointment'));
     }
@@ -75,7 +73,7 @@ class ProfessionalAppointmentController extends Controller
     {
         $professional = Auth::guard('professional')->user();
         
-        if ($appointment->session->professional_id !== $professional->id) {
+        if ($appointment->therapySession->professional_id !== $professional->id) {
             abort(403);
         }
 
@@ -83,11 +81,10 @@ class ProfessionalAppointmentController extends Controller
             'data_hora_inicio' => 'required|date',
             'data_hora_fim' => 'required|date|after:data_hora_inicio',
             'address_id' => 'nullable|exists:addresses,id',
-            'status' => 'required|in:agendado,confirmado,cancelado,concluido',
+            'status' => 'required|in:agendado,confirmado,cancelado,concluido,faltou',
             'observacoes' => 'nullable|string',
         ]);
 
-        // Verificar se o endereço pertence ao paciente
         if ($request->address_id) {
             $addressBelongsToPatient = $appointment->patient->addresses()
                 ->where('id', $request->address_id)
@@ -114,7 +111,7 @@ class ProfessionalAppointmentController extends Controller
     {
         $professional = Auth::guard('professional')->user();
         
-        if ($appointment->session->professional_id !== $professional->id) {
+        if ($appointment->therapySession->professional_id !== $professional->id) {
             abort(403);
         }
 
@@ -127,7 +124,7 @@ class ProfessionalAppointmentController extends Controller
     {
         $professional = Auth::guard('professional')->user();
         
-        if ($appointment->session->professional_id !== $professional->id) {
+        if ($appointment->therapySession->professional_id !== $professional->id) {
             abort(403);
         }
 
@@ -140,34 +137,13 @@ class ProfessionalAppointmentController extends Controller
         return redirect()->back()->with('success', 'Agendamento cancelado com sucesso!');
     }
 
-    public function createAttendance(Appointment $appointment)
-    {
-        $professional = Auth::guard('professional')->user();
-        
-        if ($appointment->session->professional_id !== $professional->id) {
-            abort(403);
-        }
-
-        if ($appointment->status !== 'confirmado') {
-            return redirect()->back()->with('error', 'Só é possível registrar atendimento para agendamentos confirmados.');
-        }
-
-        // Verificar se já existe atendimento
-        if ($appointment->attendance) {
-            return redirect()->route('professional.attendances.edit', $appointment->attendance)
-                ->with('info', 'Atendimento já registrado para este agendamento.');
-        }
-
-        return redirect()->route('professional.attendances.create', ['appointment_id' => $appointment->id]);
-    }
-
     public function today()
     {
         $professional = Auth::guard('professional')->user();
         $today = Carbon::today();
         
-        $appointments = Appointment::with(['patient', 'address', 'session'])
-            ->whereHas('session', function($query) use ($professional) {
+        $appointments = Appointment::with(['patient', 'address', 'therapySession'])
+            ->whereHas('therapySession', function($query) use ($professional) {
                 $query->where('professional_id', $professional->id);
             })
             ->whereDate('data_hora_inicio', $today)
@@ -184,8 +160,8 @@ class ProfessionalAppointmentController extends Controller
         $startOfWeek = Carbon::now()->startOfWeek();
         $endOfWeek = Carbon::now()->endOfWeek();
         
-        $appointments = Appointment::with(['patient', 'address', 'session'])
-            ->whereHas('session', function($query) use ($professional) {
+        $appointments = Appointment::with(['patient', 'address', 'therapySession'])
+            ->whereHas('therapySession', function($query) use ($professional) {
                 $query->where('professional_id', $professional->id);
             })
             ->whereBetween('data_hora_inicio', [$startOfWeek, $endOfWeek])

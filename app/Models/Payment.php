@@ -11,7 +11,7 @@ class Payment extends Model
     
     protected $fillable = [
         'attendance_id',
-        'session_id',
+        'therapy_session_id',
         'patient_id',
         'professional_id',
         'invoice_id',
@@ -32,9 +32,9 @@ class Payment extends Model
         return $this->belongsTo(Attendance::class);
     }
 
-    public function session(): BelongsTo
+    public function therapySession(): BelongsTo
     {
-        return $this->belongsTo(Session::class);
+        return $this->belongsTo(TherapySession::class);
     }
 
     public function patient(): BelongsTo
@@ -50,5 +50,51 @@ class Payment extends Model
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
+    }
+
+    protected static function booted()
+    {
+        static::created(function ($payment) {
+            // Atualizar status de pagamento do atendimento
+            if ($payment->attendance_id) {
+                $payment->attendance->update(['status_pagamento' => 'pago']);
+            }
+
+            // Atualizar valor pago da sessão
+            if ($payment->therapy_session_id) {
+                $therapySession = $payment->therapySession;
+                $totalPago = $therapySession->payments()
+                    ->where('status', 'pago')
+                    ->sum('valor');
+                $therapySession->update(['valor_pago' => $totalPago]);
+            }
+        });
+
+        static::updated(function ($payment) {
+            // Se pagamento foi estornado
+            if ($payment->status === 'estornado') {
+                if ($payment->attendance_id) {
+                    $payment->attendance->update(['status_pagamento' => 'pendente']);
+                }
+
+                if ($payment->therapy_session_id) {
+                    $therapySession = $payment->therapySession;
+                    $totalPago = $therapySession->payments()
+                        ->where('status', 'pago')
+                        ->sum('valor');
+                    $therapySession->update(['valor_pago' => $totalPago]);
+                }
+            }
+        });
+    }
+
+    public function isPago(): bool
+    {
+        return $this->status === 'pago';
+    }
+
+    public function isEstornado(): bool
+    {
+        return $this->status === 'estornado';
     }
 }

@@ -39,4 +39,26 @@ class Invoice extends Model
     {
         return $this->hasMany(Payment::class);
     }
+
+    public function isVencida(): bool
+    {
+        return $this->status === 'aberta' && $this->data_vencimento->isPast();
+    }
+
+    public function isPaga(): bool
+    {
+        return $this->status === 'paga';
+    }
+
+    public function getValorPagoAttribute(): float
+    {
+        return (float) $this->payments()
+            ->where('status', 'pago')
+            ->sum('valor');
+    }
+
+    public function getSaldoAttribute(): float
+    {
+        return max(0, (float) $this->valor_total - $this->valor_pago);
+    }
 }

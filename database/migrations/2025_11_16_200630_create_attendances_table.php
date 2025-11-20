@@ -6,30 +6,26 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('atendimentos', function (Blueprint $table) {
+        Schema::create('attendances', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('agendamento_id')->constrained('agendamentos');
-            $table->foreignId('profissional_id')->constrained('profissionals');
-            $table->foreignId('paciente_id')->constrained('pacientes');
+            $table->foreignId('appointment_id')->constrained('appointments')->onDelete('cascade');
+            $table->foreignId('professional_id')->constrained('professionals')->onDelete('cascade');
+            $table->foreignId('patient_id')->constrained('patients')->onDelete('cascade');
             $table->dateTime('data_realizacao');
+            $table->decimal('valor', 10, 2)->nullable();
             $table->text('evolucao');
             $table->text('procedimento_realizado');
             $table->text('assinatura_paciente')->nullable();
             $table->enum('status', ['concluido', 'interrompido'])->default('concluido');
+            $table->enum('status_pagamento', ['pendente', 'pago', 'pago_via_sessao', 'estornado'])->default('pendente');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('atendimentos');
+        Schema::dropIfExists('attendances');
     }
 };

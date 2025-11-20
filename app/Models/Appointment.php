@@ -11,7 +11,7 @@ class Appointment extends Model
     protected $table = 'appointments';
     
     protected $fillable = [
-        'session_id',
+        'therapy_session_id',
         'session_schedule_id',
         'patient_id',
         'address_id',
@@ -27,9 +27,9 @@ class Appointment extends Model
         'data_hora_fim' => 'datetime',
     ];
 
-    public function session(): BelongsTo
+    public function therapySession(): BelongsTo
     {
-        return $this->belongsTo(Session::class);
+        return $this->belongsTo(TherapySession::class);
     }
 
     public function sessionSchedule(): BelongsTo
@@ -70,5 +70,13 @@ class Appointment extends Model
     public function podeSerConcluido(): bool
     {
         return $this->status === 'confirmado';
+    }
+
+    public function getDuracaoMinutosAttribute(): int
+    {
+        if (!$this->data_hora_inicio || !$this->data_hora_fim) {
+            return 0;
+        }
+        return $this->data_hora_inicio->diffInMinutes($this->data_hora_fim);
     }
 }

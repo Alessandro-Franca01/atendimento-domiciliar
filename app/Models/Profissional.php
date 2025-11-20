@@ -2,41 +2,60 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class Profissional extends Model
+class Professional extends Authenticatable
 {
+    use HasFactory, Notifiable;
+
+    protected $table = 'professionals';
+
     protected $fillable = [
         'nome',
+        'email',
+        'password',
         'crefito',
+        'cpf',
+        'data_nascimento',
+        'foto',
+        'sobre',
         'telefone',
         'especialidades',
         'horario_funcionamento',
         'status'
     ];
 
-    protected $casts = [
-        'especialidades' => 'array',
+    protected $hidden = [
+        'password',
+        'remember_token',
     ];
 
-    public function sessoes(): HasMany
+    protected $casts = [
+        'especialidades' => 'array',
+        'data_nascimento' => 'date',
+        'password' => 'hashed',
+    ];
+
+    public function therapySessions(): HasMany
     {
-        return $this->hasMany(Sessao::class);
+        return $this->hasMany(TherapySession::class);
     }
 
-    public function agendamentos(): HasMany
+    public function appointments(): HasMany
     {
-        return $this->hasMany(Agendamento::class);
+        return $this->hasMany(Appointment::class);
     }
 
-    public function atendimentos(): HasMany
+    public function attendances(): HasMany
     {
-        return $this->hasMany(Atendimento::class);
+        return $this->hasMany(Attendance::class);
     }
 
-    public function pagamentos(): HasMany
+    public function payments(): HasMany
     {
-        return $this->hasMany(Pagamento::class);
+        return $this->hasMany(Payment::class);
     }
 }

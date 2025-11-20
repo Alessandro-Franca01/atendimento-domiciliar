@@ -11,7 +11,7 @@ class SessionSchedule extends Model
     protected $table = 'session_schedules';
     
     protected $fillable = [
-        'session_id',
+        'therapy_session_id',
         'dia_da_semana',
         'hora',
         'duracao_minutos',
@@ -24,9 +24,9 @@ class SessionSchedule extends Model
         'ativo' => 'boolean',
     ];
 
-    public function session(): BelongsTo
+    public function therapySession(): BelongsTo
     {
-        return $this->belongsTo(Session::class);
+        return $this->belongsTo(TherapySession::class);
     }
 
     public function address(): BelongsTo
@@ -52,5 +52,20 @@ class SessionSchedule extends Model
         ];
 
         return $dias[$this->dia_da_semana] ?? 'Desconhecido';
+    }
+
+    public function getDiaSemanaCurtoAttribute(): string
+    {
+        $dias = [
+            1 => 'Seg',
+            2 => 'Ter',
+            3 => 'Qua',
+            4 => 'Qui',
+            5 => 'Sex',
+            6 => 'Sáb',
+            7 => 'Dom'
+        ];
+
+        return $dias[$this->dia_da_semana] ?? '?';
     }
 }

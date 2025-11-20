@@ -22,9 +22,9 @@ class Patient extends Model
         return $this->hasMany(Address::class);
     }
 
-    public function sessions(): HasMany
+    public function therapySessions(): HasMany
     {
-        return $this->hasMany(Session::class);
+        return $this->hasMany(TherapySession::class);
     }
 
     public function appointments(): HasMany

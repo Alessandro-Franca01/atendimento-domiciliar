@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Session extends Model
+class TherapySession extends Model
 {
     protected $table = 'therapy_sessions';
     
@@ -21,9 +21,9 @@ class Session extends Model
         'sessoes_realizadas',
         'data_inicio',
         'data_fim_prevista',
-        'status',
         'valor_total',
-        'valor_pago'
+        'valor_pago',
+        'status'
     ];
 
     protected $casts = [
@@ -61,6 +61,11 @@ class Session extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function invoiceItems(): HasMany
+    {
+        return $this->hasMany(InvoiceItem::class);
+    }
+
     public function isCompleta(): bool
     {
         return $this->sessoes_realizadas >= $this->total_sessoes;
@@ -76,5 +81,13 @@ class Session extends Model
         $total = (float) ($this->valor_total ?? 0);
         $pago = (float) ($this->valor_pago ?? 0);
         return max(0.0, $total - $pago);
+    }
+
+    public function getPercentualConcluidoAttribute(): float
+    {
+        if ($this->total_sessoes == 0) {
+            return 0;
+        }
+        return min(100, ($this->sessoes_realizadas / $this->total_sessoes) * 100);
     }
 }

@@ -6,7 +6,7 @@ use App\Models\Attendance;
 use App\Models\Invoice;
 use App\Models\Patient;
 use App\Models\Payment;
-use App\Models\Session;
+use App\Models\TherapySession;
 use Carbon\Carbon;
 
 class FinancialReportController extends Controller
@@ -35,7 +35,7 @@ class FinancialReportController extends Controller
 
     public function sessionsReport()
     {
-        $sessions = Session::withCount(['appointments'])->get();
+        $sessions = TherapySession::withCount(['appointments'])->get();
         $paid = $sessions->filter(fn($s) => ($s->valor_total ?? 0) > 0 && abs(($s->valor_total) - ($s->valor_pago ?? 0)) < 0.00001)->count();
         $unpaid = $sessions->count() - $paid;
         $pendingAttendances = Attendance::where('status_pagamento', 'pendente')->count();
@@ -62,7 +62,7 @@ class FinancialReportController extends Controller
         $patientsInMonth = $monthlyPayments->pluck('patient_id')->unique()->count();
         $averageTicket = $patientsInMonth > 0 ? $totalMonth / $patientsInMonth : 0;
 
-        $profitBySession = Session::whereNotNull('valor_total')
+        $profitBySession = TherapySession::whereNotNull('valor_total')
             ->selectRaw('id, valor_total, valor_pago')
             ->get();
 

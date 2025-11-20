@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Attendance extends Model
 {
@@ -42,21 +43,42 @@ class Attendance extends Model
         return $this->belongsTo(Patient::class);
     }
 
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    public function invoiceItems(): HasMany
+    {
+        return $this->hasMany(InvoiceItem::class);
+    }
+
     protected static function booted()
     {
         static::created(function ($attendance) {
             // Incrementar sessões realizadas da sessão
-            $session = $attendance->appointment->session;
-            $session->increment('sessoes_realizadas');
+            $therapySession = $attendance->appointment->therapySession;
+            $therapySession->increment('sessoes_realizadas');
             
             // Verificar se a sessão foi concluída
-            if ($session->sessoes_realizadas >= $session->total_sessoes) {
-                $session->update(['status' => 'concluido']);
+            if ($therapySession->sessoes_realizadas >= $therapySession->total_sessoes) {
+                $therapySession->update(['status' => 'concluido']);
             }
 
-            if (($session->valor_total ?? null) !== null && (float) ($session->saldo_pagamento ?? 0) === 0.0) {
+            // Atualizar status de pagamento se sessão já está paga
+            if (($therapySession->valor_total ?? null) !== null && (float) ($therapySession->saldo_pagamento ?? 0) === 0.0) {
                 $attendance->update(['status_pagamento' => 'pago_via_sessao']);
             }
         });
+    }
+
+    public function isPago(): bool
+    {
+        return in_array($this->status_pagamento, ['pago', 'pago_via_sessao']);
+    }
+
+    public function isPendente(): bool
+    {
+        return $this->status_pagamento === 'pendente';
     }
 }

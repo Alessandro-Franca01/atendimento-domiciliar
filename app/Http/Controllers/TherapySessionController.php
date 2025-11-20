@@ -4,39 +4,30 @@ namespace App\Http\Controllers;
 
 use App\Models\Patient;
 use App\Models\Professional;
-use App\Models\Session;
+use App\Models\TherapySession;
 use App\Models\SessionSchedule;
 use App\Services\AppointmentService;
 use Illuminate\Http\Request;
 
-class SessaoController extends Controller
+class TherapySessionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $sessions = Session::with(['patient', 'professional'])
+        $sessions = TherapySession::with(['patient', 'professional'])
             ->orderBy('data_inicio', 'desc')
             ->paginate(10);
 
-        return view('sessions.index', compact('sessions'));
+        return view('therapy_sessions.index', compact('sessions'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $patients = Patient::where('status', 'ativo')->orderBy('nome')->get();
         $professionals = Professional::where('status', 'ativo')->orderBy('nome')->get();
 
-        return view('sessions.create', compact('patients', 'professionals'));
+        return view('therapy_sessions.create', compact('patients', 'professionals'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -46,6 +37,7 @@ class SessaoController extends Controller
             'total_sessoes' => 'required|integer|min:1',
             'valor_por_sessao' => 'nullable|numeric|min:0',
             'desconto_percentual' => 'nullable|numeric|min:0|max:100',
+            'desconto_valor' => 'nullable|numeric|min:0',
             'data_inicio' => 'required|date',
             'data_fim_prevista' => 'nullable|date|after_or_equal:data_inicio',
         ]);
@@ -62,44 +54,35 @@ class SessaoController extends Controller
             }
         }
 
-        $session = Session::create($dados);
+        $session = TherapySession::create($dados);
 
-        return redirect()->route('sessions.show', $session)
-            ->with('success', 'Session created successfully.');
+        return redirect()->route('therapy_sessions.show', $session)
+            ->with('success', 'Therapy session created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Session $session)
+    public function show(TherapySession $therapySession)
     {
-        $session->load(['patient', 'professional', 'sessionSchedules.address', 'appointments']);
-        return view('sessions.show', compact('session'));
+        $therapySession->load(['patient', 'professional', 'sessionSchedules.address', 'appointments']);
+        return view('therapy_sessions.show', compact('therapySession'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Session $session)
+    public function edit(TherapySession $therapySession)
     {
-        if ($session->status === 'concluido') {
-            return redirect()->route('sessions.show', $session)
+        if ($therapySession->status === 'concluido') {
+            return redirect()->route('therapy_sessions.show', $therapySession)
                 ->with('error', 'Cannot edit a completed session.');
         }
 
         $patients = Patient::where('status', 'ativo')->orderBy('nome')->get();
         $professionals = Professional::where('status', 'ativo')->orderBy('nome')->get();
 
-        return view('sessions.edit', compact('session', 'patients', 'professionals'));
+        return view('therapy_sessions.edit', compact('therapySession', 'patients', 'professionals'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Session $session)
+    public function update(Request $request, TherapySession $therapySession)
     {
-        if ($session->status === 'concluido') {
-            return redirect()->route('sessions.show', $session)
+        if ($therapySession->status === 'concluido') {
+            return redirect()->route('therapy_sessions.show', $therapySession)
                 ->with('error', 'Cannot edit a completed session.');
         }
 
@@ -110,6 +93,7 @@ class SessaoController extends Controller
             'total_sessoes' => 'required|integer|min:1',
             'valor_por_sessao' => 'nullable|numeric|min:0',
             'desconto_percentual' => 'nullable|numeric|min:0|max:100',
+            'desconto_valor' => 'nullable|numeric|min:0',
             'data_inicio' => 'required|date',
             'data_fim_prevista' => 'nullable|date|after_or_equal:data_inicio',
             'status' => 'required|in:ativo,concluido,suspenso',
@@ -127,35 +111,29 @@ class SessaoController extends Controller
             }
         }
 
-        $session->update($dados);
+        $therapySession->update($dados);
 
-        return redirect()->route('sessions.show', $session)
-            ->with('success', 'Session updated successfully.');
+        return redirect()->route('therapy_sessions.show', $therapySession)
+            ->with('success', 'Therapy session updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Session $session)
+    public function destroy(TherapySession $therapySession)
     {
-        if ($session->appointments()->exists()) {
-            return redirect()->route('sessions.show', $session)
+        if ($therapySession->appointments()->exists()) {
+            return redirect()->route('therapy_sessions.show', $therapySession)
                 ->with('error', 'Cannot delete session with appointments.');
         }
 
-        $session->delete();
+        $therapySession->delete();
 
-        return redirect()->route('sessions.index')
-            ->with('success', 'Session deleted successfully.');
+        return redirect()->route('therapy_sessions.index')
+            ->with('success', 'Therapy session deleted successfully.');
     }
 
-    /**
-     * Gera agendamentos automáticos para uma sessão
-     */
-    public function gerarAgendamentos(Session $session, Request $request)
+    public function generateAppointments(TherapySession $therapySession, Request $request)
     {
-        if ($session->status !== 'ativo') {
-            return redirect()->route('sessions.show', $session)
+        if ($therapySession->status !== 'ativo') {
+            return redirect()->route('therapy_sessions.show', $therapySession)
                 ->with('error', 'Can only generate appointments for active sessions.');
         }
 
@@ -164,9 +142,9 @@ class SessaoController extends Controller
         ]);
 
         $appointmentService = new AppointmentService();
-        $appointmentsCreated = $appointmentService->gerarAgendamentosAutomaticos($request->dias);
+        $appointmentsCreated = $appointmentService->generateAutomaticAppointments($therapySession, $request->dias);
 
-        return redirect()->route('sessions.show', $session)
+        return redirect()->route('therapy_sessions.show', $therapySession)
             ->with('success', "{$appointmentsCreated} automatic appointments were created.");
     }
 }
