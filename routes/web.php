@@ -32,7 +32,7 @@ Route::prefix('professional')->name('professional.')->group(function () {
     Route::post('/logout', [ProfessionalAuthController::class, 'logout'])->name('logout');
 
     // Área Autenticada do Profissional
-    Route::middleware('auth:professional')->group(function () {
+    Route::middleware('auth.professional')->group(function () {
         // Dashboard
         Route::get('/dashboard', [ProfessionalDashboardController::class, 'index'])->name('dashboard');
         

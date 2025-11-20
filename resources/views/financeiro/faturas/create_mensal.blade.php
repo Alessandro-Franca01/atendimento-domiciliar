@@ -12,9 +12,9 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label">Paciente</label>
-                    <select name="paciente_id" class="form-select" required>
+                        <select name="patient_id" class="form-select" required>
                         <option value="">Selecione...</option>
-                        @foreach($pacientes as $p)
+                            @foreach($patients as $p)
                             <option value="{{ $p->id }}">{{ $p->nome }}</option>
                         @endforeach
                     </select>
