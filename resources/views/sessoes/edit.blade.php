@@ -13,19 +13,19 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label">Paciente</label>
-                    <select name="paciente_id" class="form-select" required>
-                        @foreach($pacientes as $p)
-                            <option value="{{ $p->id }}" @selected($sessao->paciente_id === $p->id)>{{ $p->nome }}</option>
-                        @endforeach
-                    </select>
+                        <select name="patient_id" class="form-select" required>
+                            @foreach($pacientes as $p)
+                                <option value="{{ $p->id }}" @selected($sessao->patient_id === $p->id)>{{ $p->nome }}</option>
+                            @endforeach
+                        </select>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Profissional</label>
-                    <select name="profissional_id" class="form-select" required>
-                        @foreach($profissionals as $pr)
-                            <option value="{{ $pr->id }}" @selected($sessao->profissional_id === $pr->id)>{{ $pr->nome }}</option>
-                        @endforeach
-                    </select>
+                        <select name="professional_id" class="form-select" required>
+                            @foreach($profissionals as $pr)
+                                <option value="{{ $pr->id }}" @selected($sessao->professional_id === $pr->id)>{{ $pr->nome }}</option>
+                            @endforeach
+                        </select>
                 </div>
                 <div class="col-md-12">
                     <label class="form-label">Descrição</label>

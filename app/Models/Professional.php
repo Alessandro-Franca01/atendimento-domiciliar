@@ -2,25 +2,55 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Notifications\Notifiable;
 
-class Professional extends Model
+class Professional extends Authenticatable
 {
+    use Notifiable;
     protected $table = 'professionals';
     
     protected $fillable = [
         'nome',
+        'email',
+        'password',
         'crefito',
+        'cpf',
         'telefone',
+        'data_nascimento',
+        'foto',
+        'sobre',
         'especialidades',
         'horario_funcionamento',
         'status'
     ];
 
-    protected $casts = [
-        'especialidades' => 'array',
+    protected $hidden = [
+        'password',
+        'remember_token',
     ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'data_nascimento' => 'date',
+        'password' => 'hashed',
+    ];
+
+    public function getAuthPasswordName()
+    {
+        return 'password';
+    }
+
+    public function getAuthIdentifierName()
+    {
+        return 'id';
+    }
+
+    public function getAuthIdentifier()
+    {
+        return $this->id;
+    }
 
     public function sessions(): HasMany
     {

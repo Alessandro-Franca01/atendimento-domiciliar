@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::table('therapy_sessions', function (Blueprint $table) {
+        Schema::table('sessoes', function (Blueprint $table) {
             $table->decimal('valor_total', 10, 2)->nullable()->after('data_fim_prevista');
             $table->decimal('valor_pago', 10, 2)->default(0)->after('valor_total');
         });
@@ -15,7 +15,7 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::table('therapy_sessions', function (Blueprint $table) {
+        Schema::table('sessoes', function (Blueprint $table) {
             $table->dropColumn(['valor_total', 'valor_pago']);
         });
     }

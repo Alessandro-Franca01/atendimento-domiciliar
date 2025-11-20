@@ -10,7 +10,7 @@ return new class extends Migration {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('attendance_id')->nullable()->constrained('attendances')->onDelete('cascade');
-            $table->foreignId('session_id')->nullable()->constrained('therapy_sessions')->onDelete('cascade');
+            $table->foreignId('session_id')->nullable()->constrained('sessoes')->onDelete('cascade');
             $table->foreignId('patient_id')->constrained('patients')->onDelete('cascade');
             $table->foreignId('professional_id')->constrained('professionals')->onDelete('cascade');
             $table->foreignId('invoice_id')->nullable()->constrained('invoices')->onDelete('set null');
