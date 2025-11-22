@@ -35,7 +35,11 @@ class PatientController extends Controller
         $request->validate([
             'nome' => 'required|string|max:255',
             'telefone' => 'required|string|max:20',
-            'documento' => 'required|string|max:20|unique:patients',
+            'email' => 'nullable|email|unique:patients,email',
+            'cpf' => 'required|string|max:20|unique:patients,cpf',
+            'data_nascimento' => 'nullable|date',
+            'convenio' => 'nullable|string|max:100',
+            'numero_whatsapp' => 'nullable|string|max:20',
             'observacoes' => 'nullable|string',
             'status' => 'required|in:ativo,inativo',
         ]);
@@ -71,7 +75,11 @@ class PatientController extends Controller
         $request->validate([
             'nome' => 'required|string|max:255',
             'telefone' => 'required|string|max:20',
-            'documento' => 'required|string|max:20|unique:patients,documento,' . $patient->id,
+            'email' => 'nullable|email|unique:patients,email,' . $patient->id,
+            'cpf' => 'required|string|max:20|unique:patients,cpf,' . $patient->id,
+            'data_nascimento' => 'nullable|date',
+            'convenio' => 'nullable|string|max:100',
+            'numero_whatsapp' => 'nullable|string|max:20',
             'observacoes' => 'nullable|string',
             'status' => 'required|in:ativo,inativo',
         ]);

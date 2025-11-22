@@ -16,7 +16,7 @@ class InvoiceItem extends Model
         'valor_unitario',
         'valor_total',
         'attendance_id',
-        'session_id',
+        'therapy_session_id',
     ];
 
     protected $casts = [
@@ -34,8 +34,16 @@ class InvoiceItem extends Model
         return $this->belongsTo(Attendance::class);
     }
 
-    public function session(): BelongsTo
+    public function therapySession(): BelongsTo
     {
-        return $this->belongsTo(Session::class);
+        return $this->belongsTo(TherapySession::class);
+    }
+
+    protected static function booted()
+    {
+        static::saving(function ($item) {
+            // Calcular valor total automaticamente
+            $item->valor_total = $item->quantidade * $item->valor_unitario;
+        });
     }
 }

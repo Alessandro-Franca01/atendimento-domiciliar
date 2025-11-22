@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Appointment;
 use App\Models\Patient;
-use App\Models\Session;
+use App\Models\TherapySession;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -13,8 +13,8 @@ class DashboardController extends Controller
     public function index()
     {
         $totalPatients = Patient::count();
-        $totalSessions = Session::count();
-        $activeSessions = Session::where('status', 'ativo')->count();
+        $totalSessions = TherapySession::count();
+        $activeSessions = TherapySession::where('status', 'ativo')->count();
         
         $today = Carbon::today();
         $appointmentsToday = Appointment::whereDate('data_hora_inicio', $today)
@@ -28,7 +28,7 @@ class DashboardController extends Controller
             ->limit(10)
             ->get();
 
-        $sessionsNearEnd = Session::with('patient')
+        $sessionsNearEnd = TherapySession::with('patient')
             ->where('status', 'ativo')
             ->whereRaw('sessoes_realizadas >= total_sessoes - 2')
             ->orderBy('sessoes_realizadas', 'desc')

@@ -4,9 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Appointment;
 use App\Models\Patient;
-use App\Models\Session;
+use App\Models\TherapySession;
 use App\Models\Payment;
-use App\Models\Invoice;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,17 +17,17 @@ class ProfessionalDashboardController extends Controller
         $professional = Auth::guard('professional')->user();
         
         // Estatísticas do profissional
-        $totalPatients = Patient::whereHas('sessions', function($query) use ($professional) {
+        $totalPatients = Patient::whereHas('therapySessions', function($query) use ($professional) {
             $query->where('professional_id', $professional->id);
         })->count();
 
-        $totalSessions = Session::where('professional_id', $professional->id)->count();
-        $activeSessions = Session::where('professional_id', $professional->id)
+        $totalSessions = TherapySession::where('professional_id', $professional->id)->count();
+        $activeSessions = TherapySession::where('professional_id', $professional->id)
             ->where('status', 'ativo')
             ->count();
 
         $today = Carbon::today();
-        $appointmentsToday = Appointment::whereHas('session', function($query) use ($professional) {
+        $appointmentsToday = Appointment::whereHas('therapySession', function($query) use ($professional) {
                 $query->where('professional_id', $professional->id);
             })
             ->whereDate('data_hora_inicio', $today)
@@ -36,8 +35,8 @@ class ProfessionalDashboardController extends Controller
             ->count();
 
         // Agendamentos próximos
-        $upcomingAppointments = Appointment::with(['patient', 'address', 'session'])
-            ->whereHas('session', function($query) use ($professional) {
+        $upcomingAppointments = Appointment::with(['patient', 'address', 'therapySession'])
+            ->whereHas('therapySession', function($query) use ($professional) {
                 $query->where('professional_id', $professional->id);
             })
             ->where('data_hora_inicio', '>=', $today)
@@ -47,7 +46,7 @@ class ProfessionalDashboardController extends Controller
             ->get();
 
         // Sessões próximas do fim
-        $sessionsNearEnd = Session::with('patient')
+        $sessionsNearEnd = TherapySession::with('patient')
             ->where('professional_id', $professional->id)
             ->where('status', 'ativo')
             ->whereRaw('sessoes_realizadas >= total_sessoes - 2')
@@ -56,16 +55,12 @@ class ProfessionalDashboardController extends Controller
             ->get();
 
         // Financeiro
-        $monthlyRevenue = Payment::whereHas('appointment.session', function($query) use ($professional) {
-                $query->where('professional_id', $professional->id);
-            })
+        $monthlyRevenue = Payment::where('professional_id', $professional->id)
             ->whereMonth('data_pagamento', Carbon::now()->month)
             ->where('status', 'pago')
             ->sum('valor');
 
-        $pendingPayments = Payment::whereHas('appointment.session', function($query) use ($professional) {
-                $query->where('professional_id', $professional->id);
-            })
+        $pendingPayments = Payment::where('professional_id', $professional->id)
             ->where('status', 'pendente')
             ->count();
 

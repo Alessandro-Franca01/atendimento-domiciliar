@@ -35,4 +35,9 @@ class Address extends Model
     {
         return $this->hasMany(Appointment::class);
     }
+
+    public function getEnderecoCompletoAttribute(): string
+    {
+        return "{$this->logradouro}, {$this->numero} - {$this->bairro}, {$this->cidade} - CEP: {$this->cep}";
+    }
 }

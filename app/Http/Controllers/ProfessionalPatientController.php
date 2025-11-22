@@ -11,16 +11,16 @@ class ProfessionalPatientController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:professional');
+        // $this->middleware('auth:professional');
     }
 
     public function index()
     {
         $professional = Auth::guard('professional')->user();
         
-        $patients = Patient::whereHas('sessions', function($query) use ($professional) {
+        $patients = Patient::whereHas('therapySessions', function($query) use ($professional) {
             $query->where('professional_id', $professional->id);
-        })->with(['addresses', 'sessions' => function($query) use ($professional) {
+        })->with(['addresses', 'therapySessions' => function($query) use ($professional) {
             $query->where('professional_id', $professional->id);
         }])->orderBy('nome')->paginate(10);
 
@@ -39,7 +39,8 @@ class ProfessionalPatientController extends Controller
             'email' => 'nullable|email|unique:patients,email',
             'telefone' => 'required|string|max:20',
             'data_nascimento' => 'nullable|date',
-            'cpf' => 'nullable|string|max:14|unique:patients,cpf',
+            'cpf' => 'nullable|string|max:20|unique:patients,cpf',
+            'numero_whatsapp' => 'nullable|string|max:20',
             'convenio' => 'nullable|string|max:100',
             'numero_carteirinha' => 'nullable|string|max:50',
             'observacoes' => 'nullable|string',
@@ -59,6 +60,7 @@ class ProfessionalPatientController extends Controller
             'telefone' => $request->telefone,
             'data_nascimento' => $request->data_nascimento,
             'cpf' => $request->cpf,
+            'numero_whatsapp' => $request->numero_whatsapp,
             'convenio' => $request->convenio,
             'numero_carteirinha' => $request->numero_carteirinha,
             'observacoes' => $request->observacoes,
@@ -129,7 +131,8 @@ class ProfessionalPatientController extends Controller
             'email' => 'nullable|email|unique:patients,email,' . $patient->id,
             'telefone' => 'required|string|max:20',
             'data_nascimento' => 'nullable|date',
-            'cpf' => 'nullable|string|max:14|unique:patients,cpf,' . $patient->id,
+            'cpf' => 'nullable|string|max:20|unique:patients,cpf,' . $patient->id,
+            'numero_whatsapp' => 'nullable|string|max:20',
             'convenio' => 'nullable|string|max:100',
             'numero_carteirinha' => 'nullable|string|max:50',
             'observacoes' => 'nullable|string',
@@ -141,6 +144,7 @@ class ProfessionalPatientController extends Controller
             'telefone' => $request->telefone,
             'data_nascimento' => $request->data_nascimento,
             'cpf' => $request->cpf,
+            'numero_whatsapp' => $request->numero_whatsapp,
             'convenio' => $request->convenio,
             'numero_carteirinha' => $request->numero_carteirinha,
             'observacoes' => $request->observacoes,

@@ -12,7 +12,12 @@ class Patient extends Model
     protected $fillable = [
         'nome',
         'telefone',
-        'documento',
+        'email',
+        'cpf',
+        'data_nascimento',
+        'convenio',
+        'numero_whatsapp',
+        'numero_carteirinha',
         'observacoes',
         'status'
     ];
@@ -22,9 +27,9 @@ class Patient extends Model
         return $this->hasMany(Address::class);
     }
 
-    public function sessions(): HasMany
+    public function therapySessions(): HasMany
     {
-        return $this->hasMany(Session::class);
+        return $this->hasMany(TherapySession::class);
     }
 
     public function appointments(): HasMany

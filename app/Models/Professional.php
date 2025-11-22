@@ -2,25 +2,27 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class Professional extends Authenticatable
 {
-    use Notifiable;
+    use HasFactory, Notifiable;
+
     protected $table = 'professionals';
-    
+
     protected $fillable = [
         'nome',
         'email',
         'password',
         'crefito',
         'cpf',
-        'telefone',
         'data_nascimento',
         'foto',
         'sobre',
+        'telefone',
         'especialidades',
         'horario_funcionamento',
         'status'
@@ -32,29 +34,14 @@ class Professional extends Authenticatable
     ];
 
     protected $casts = [
-        'email_verified_at' => 'datetime',
+        'especialidades' => 'array',
         'data_nascimento' => 'date',
         'password' => 'hashed',
     ];
 
-    public function getAuthPasswordName()
+    public function therapySessions(): HasMany
     {
-        return 'password';
-    }
-
-    public function getAuthIdentifierName()
-    {
-        return 'id';
-    }
-
-    public function getAuthIdentifier()
-    {
-        return $this->id;
-    }
-
-    public function sessions(): HasMany
-    {
-        return $this->hasMany(Session::class);
+        return $this->hasMany(TherapySession::class);
     }
 
     public function appointments(): HasMany
