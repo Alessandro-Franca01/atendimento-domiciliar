@@ -42,13 +42,34 @@
                         @enderror
                     </div>
                 </div>
-                
                 <div class="col-md-3">
                     <div class="mb-3">
-                        <label for="documento" class="form-label">Documento (CPF) *</label>
-                        <input type="text" class="form-control @error('documento') is-invalid @enderror" 
-                               id="documento" name="documento" value="{{ old('documento') }}" required>
-                        @error('documento')
+                        <label for="email" class="form-label">E-mail</label>
+                        <input type="email" class="form-control @error('email') is-invalid @enderror"
+                               id="email" name="email" value="{{ old('email') }}">
+                        @error('email')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label for="cpf" class="form-label">CPF *</label>
+                        <input type="text" class="form-control @error('cpf') is-invalid @enderror" 
+                               id="cpf" name="cpf" value="{{ old('cpf') }}" required>
+                        @error('cpf')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label for="data_nascimento" class="form-label">Data de Nascimento</label>
+                        <input type="date" class="form-control @error('data_nascimento') is-invalid @enderror"
+                               id="data_nascimento" name="data_nascimento" value="{{ old('data_nascimento') }}">
+                        @error('data_nascimento')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
@@ -56,12 +77,34 @@
             </div>
             
             <div class="row">
-                <div class="col-md-12">
+                <div class="col-md-4">
                     <div class="mb-3">
-                        <label for="observacoes" class="form-label">Observações</label>
-                        <textarea class="form-control @error('observacoes') is-invalid @enderror" 
-                                  id="observacoes" name="observacoes" rows="3">{{ old('observacoes') }}</textarea>
-                        @error('observacoes')
+                        <label for="convenio" class="form-label">Convênio</label>
+                        <input type="text" class="form-control @error('convenio') is-invalid @enderror"
+                               id="convenio" name="convenio" value="{{ old('convenio') }}">
+                        @error('convenio')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="numero_whatsapp" class="form-label">Número (WhatsApp)</label>
+                        <input type="text" class="form-control @error('numero_whatsapp') is-invalid @enderror"
+                               id="numero_whatsapp" name="numero_whatsapp" value="{{ old('numero_whatsapp') }}">
+                        @error('numero_whatsapp')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="numero_carteirinha" class="form-label">Número da Carteirinha</label>
+                        <input type="text" class="form-control @error('numero_carteirinha') is-invalid @enderror"
+                               id="numero_carteirinha" name="numero_carteirinha" value="{{ old('numero_carteirinha') }}">
+                        @error('numero_carteirinha')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>

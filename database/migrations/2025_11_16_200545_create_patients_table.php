@@ -12,7 +12,12 @@ return new class extends Migration
             $table->id();
             $table->string('nome');
             $table->string('telefone');
-            $table->string('documento')->unique();
+            $table->string('email')->nullable()->unique();
+            $table->string('cpf')->nullable()->unique();
+            $table->date('data_nascimento')->nullable();
+            $table->string('convenio')->nullable();
+            $table->string('numero_whatsapp')->nullable();
+            $table->string('numero_carteirinha')->nullable();
             $table->text('observacoes')->nullable();
             $table->enum('status', ['ativo', 'inativo'])->default('ativo');
             $table->timestamps();

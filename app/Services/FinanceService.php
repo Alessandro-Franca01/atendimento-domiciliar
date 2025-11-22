@@ -2,179 +2,297 @@
 
 namespace App\Services;
 
-use App\Models\Atendimento;
-use App\Models\Fatura;
-use App\Models\FaturaItem;
-use App\Models\Pagamento;
-use App\Models\Sessao;
+use App\Models\Attendance;
+use App\Models\Invoice;
+use App\Models\InvoiceItem;
+use App\Models\Payment;
+use App\Models\TherapySession;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class FinanceService
 {
-    public function pagarSessao(Sessao $sessao, array $data): Pagamento
+    /**
+     * Process payment for a therapy session
+     */
+    public function paySession(TherapySession $therapySession, array $data): Payment
     {
-        return DB::transaction(function () use ($sessao, $data) {
-            if ($sessao->valor_total === null) {
-                throw new \InvalidArgumentException('Sessão não possui valor_total definido.');
+        return DB::transaction(function () use ($therapySession, $data) {
+            if ($therapySession->valor_total === null) {
+                throw new \InvalidArgumentException('Therapy session does not have a total value defined.');
             }
 
-            $valor = (float) $data['valor'];
-            $novoPago = (float) $sessao->valor_pago + $valor;
-            if ($novoPago - (float) $sessao->valor_total > 0.00001) {
-                throw new \InvalidArgumentException('Valor do pagamento excede o total da sessão.');
+            $amount = (float) $data['valor'];
+            $newPaidAmount = (float) $therapySession->valor_pago + $amount;
+            
+            if ($newPaidAmount - (float) $therapySession->valor_total > 0.00001) {
+                throw new \InvalidArgumentException('Payment amount exceeds the session total.');
             }
 
-            if (!empty($data['fatura_id'])) {
-                $this->validarLimiteFaturaPagamento((int) $data['fatura_id'], (float) $data['valor']);
+            if (!empty($data['invoice_id'])) {
+                $this->validateInvoicePaymentLimit((int) $data['invoice_id'], $amount);
             }
 
-            $pagamento = Pagamento::create([
-                'sessao_id' => $sessao->id,
-                'paciente_id' => $sessao->paciente_id,
-                'profissional_id' => $sessao->profissional_id,
-                'fatura_id' => $data['fatura_id'] ?? null,
+            $payment = Payment::create([
+                'therapy_session_id' => $therapySession->id,
+                'patient_id' => $therapySession->patient_id,
+                'professional_id' => $therapySession->professional_id,
+                'invoice_id' => $data['invoice_id'] ?? null,
                 'metodo_pagamento' => $data['metodo_pagamento'],
-                'valor' => $valor,
+                'valor' => $amount,
                 'data_pagamento' => Carbon::parse($data['data_pagamento'] ?? Carbon::now())->toDateString(),
                 'status' => $data['status'] ?? 'pago',
                 'observacoes' => $data['observacoes'] ?? null,
             ]);
 
-            $sessao->update(['valor_pago' => $novoPago]);
+            $therapySession->update(['valor_pago' => $newPaidAmount]);
 
-            if (abs($sessao->valor_total - $novoPago) < 0.00001) {
-                $this->marcarAtendimentosDaSessaoComoPagoViaSessao($sessao);
+            // If session is fully paid, mark all attendances as paid via session
+            if (abs($therapySession->valor_total - $newPaidAmount) < 0.00001) {
+                $this->markSessionAttendancesAsPaid($therapySession);
             }
 
-            return $pagamento;
+            return $payment;
         });
     }
 
-    public function pagarAtendimento(Atendimento $atendimento, array $data): Pagamento
+    /**
+     * Process payment for an attendance
+     */
+    public function payAttendance(Attendance $attendance, array $data): Payment
     {
-        return DB::transaction(function () use ($atendimento, $data) {
-            $dataPagamento = Carbon::parse($data['data_pagamento'] ?? Carbon::now())->toDateString();
+        return DB::transaction(function () use ($attendance, $data) {
+            $paymentDate = Carbon::parse($data['data_pagamento'] ?? Carbon::now())->toDateString();
 
-            $duplicado = Pagamento::where('atendimento_id', $atendimento->id)
-                ->whereDate('data_pagamento', $dataPagamento)
+            // Check for duplicate payment
+            $duplicate = Payment::where('attendance_id', $attendance->id)
+                ->whereDate('data_pagamento', $paymentDate)
                 ->exists();
-            if ($duplicado) {
-                throw new \InvalidArgumentException('Pagamento duplicado para o mesmo atendimento no mesmo dia.');
+                
+            if ($duplicate) {
+                throw new \InvalidArgumentException('Duplicate payment for the same attendance on the same day.');
             }
 
-            if (!empty($data['fatura_id'])) {
-                $this->validarLimiteFaturaPagamento((int) $data['fatura_id'], (float) $data['valor']);
+            if (!empty($data['invoice_id'])) {
+                $this->validateInvoicePaymentLimit((int) $data['invoice_id'], (float) $data['valor']);
             }
 
-            $pagamento = Pagamento::create([
-                'atendimento_id' => $atendimento->id,
-                'paciente_id' => $atendimento->paciente_id,
-                'profissional_id' => $atendimento->profissional_id,
-                'fatura_id' => $data['fatura_id'] ?? null,
+            $payment = Payment::create([
+                'attendance_id' => $attendance->id,
+                'patient_id' => $attendance->patient_id,
+                'professional_id' => $attendance->professional_id,
+                'invoice_id' => $data['invoice_id'] ?? null,
                 'metodo_pagamento' => $data['metodo_pagamento'],
                 'valor' => (float) $data['valor'],
-                'data_pagamento' => $dataPagamento,
+                'data_pagamento' => $paymentDate,
                 'status' => $data['status'] ?? 'pago',
                 'observacoes' => $data['observacoes'] ?? null,
             ]);
 
-            $atendimento->update(['status_pagamento' => 'pago']);
+            $attendance->update(['status_pagamento' => 'pago']);
 
-            return $pagamento;
+            return $payment;
         });
     }
 
-    public function validarLimiteFaturaPagamento(int $faturaId, float $novoValor): void
+    /**
+     * Validate that invoice payment limit is not exceeded
+     */
+    public function validateInvoicePaymentLimit(int $invoiceId, float $newAmount): void
     {
-        $fatura = Fatura::findOrFail($faturaId);
-        $totalPagamentos = $fatura->pagamentos()->where('status', '!=', 'estornado')->sum('valor');
-        if (($totalPagamentos + $novoValor) - (float) $fatura->valor_total > 0.00001) {
-            throw new \InvalidArgumentException('Valor dos pagamentos excede o total da fatura.');
+        $invoice = Invoice::findOrFail($invoiceId);
+        $totalPayments = $invoice->payments()->where('status', '!=', 'estornado')->sum('valor');
+        
+        if (($totalPayments + $newAmount) - (float) $invoice->valor_total > 0.00001) {
+            throw new \InvalidArgumentException('Payment amount exceeds the invoice total.');
         }
     }
 
-    public function estornarPagamento(Pagamento $pagamento): void
+    /**
+     * Refund a payment
+     */
+    public function refundPayment(Payment $payment): void
     {
-        DB::transaction(function () use ($pagamento) {
-            if ($pagamento->status === 'estornado') {
+        DB::transaction(function () use ($payment) {
+            if ($payment->status === 'estornado') {
                 return;
             }
 
-            $pagamento->update(['status' => 'estornado']);
+            $payment->update(['status' => 'estornado']);
 
-            if ($pagamento->sessao_id) {
-                $sessao = $pagamento->sessao;
-                $novoPago = max(0.0, (float) $sessao->valor_pago - (float) $pagamento->valor);
-                $sessao->update(['valor_pago' => $novoPago]);
+            // Update session paid amount if applicable
+            if ($payment->therapy_session_id) {
+                $session = $payment->therapySession;
+                $newPaidAmount = max(0.0, (float) $session->valor_pago - (float) $payment->valor);
+                $session->update(['valor_pago' => $newPaidAmount]);
 
-                if ($sessao->saldo_pagamento > 0) {
-                    $this->marcarAtendimentosDaSessaoComoPendentes($sessao);
+                // If session has outstanding balance, mark attendances as pending
+                if ($session->saldo_pagamento > 0) {
+                    $this->markSessionAttendancesAsPending($session);
                 }
             }
 
-            if ($pagamento->atendimento_id) {
-                $atendimento = $pagamento->atendimento;
-                $atendimento->update(['status_pagamento' => 'pendente']);
+            // Update attendance payment status if applicable
+            if ($payment->attendance_id) {
+                $attendance = $payment->attendance;
+                $attendance->update(['status_pagamento' => 'pendente']);
             }
         });
     }
 
-    public function gerarFaturaMensal(int $pacienteId, Carbon $mesRef): Fatura
+    /**
+     * Generate monthly invoice for a patient
+     */
+    public function generateMonthlyInvoice(int $patientId, Carbon $monthRef): Invoice
     {
-        return DB::transaction(function () use ($pacienteId, $mesRef) {
-            $inicio = $mesRef->copy()->startOfMonth();
-            $fim = $mesRef->copy()->endOfMonth();
+        return DB::transaction(function () use ($patientId, $monthRef) {
+            $startDate = $monthRef->copy()->startOfMonth();
+            $endDate = $monthRef->copy()->endOfMonth();
 
-            $atendimentos = Atendimento::where('paciente_id', $pacienteId)
-                ->whereBetween('data_realizacao', [$inicio, $fim])
+            // Get all attendances for the month
+            $attendances = Attendance::where('patient_id', $patientId)
+                ->whereBetween('data_realizacao', [$startDate, $endDate])
                 ->get();
 
-            $valorTotal = 0.0;
+            $totalAmount = 0.0;
 
-            $fatura = Fatura::create([
-                'paciente_id' => $pacienteId,
+            // Create invoice
+            $invoice = Invoice::create([
+                'patient_id' => $patientId,
                 'valor_total' => 0,
                 'data_emissao' => Carbon::now()->toDateString(),
-                'data_vencimento' => $fim->toDateString(),
+                'data_vencimento' => $endDate->toDateString(),
                 'status' => 'aberta',
                 'tipo' => 'mensalidade',
             ]);
 
-            foreach ($atendimentos as $atendimento) {
-                $valorItem = (float) ($atendimento->valor ?? 0); // se existir campo futuro
-                if ($valorItem <= 0) {
-                    $valorItem = (float) 0;
+            // Create invoice items for each attendance
+            foreach ($attendances as $attendance) {
+                $itemValue = (float) ($attendance->valor ?? 0);
+                if ($itemValue > 0) {
+                    $totalAmount += $itemValue;
+                    
+                    InvoiceItem::create([
+                        'invoice_id' => $invoice->id,
+                        'descricao' => 'Atendimento em ' . Carbon::parse($attendance->data_realizacao)->format('d/m/Y'),
+                        'quantidade' => 1,
+                        'valor_unitario' => $itemValue,
+                        'valor_total' => $itemValue,
+                        'attendance_id' => $attendance->id,
+                        'therapy_session_id' => null,
+                    ]);
                 }
-                $valorTotal += $valorItem;
-                FaturaItem::create([
-                    'fatura_id' => $fatura->id,
-                    'descricao' => 'Atendimento em ' . Carbon::parse($atendimento->data_realizacao)->format('d/m/Y'),
-                    'quantidade' => 1,
-                    'valor_unitario' => $valorItem,
-                    'valor_total' => $valorItem,
-                    'atendimento_id' => $atendimento->id,
-                    'sessao_id' => null,
-                ]);
             }
 
-            $fatura->update(['valor_total' => $valorTotal]);
+            // Update invoice total
+            $invoice->update(['valor_total' => $totalAmount]);
 
-            return $fatura;
+            return $invoice;
         });
     }
 
-    private function marcarAtendimentosDaSessaoComoPagoViaSessao(Sessao $sessao): void
+    /**
+     * Generate invoice for a complete therapy session
+     */
+    public function generateSessionInvoice(TherapySession $therapySession): Invoice
     {
-        $agendamentoIds = $sessao->agendamentos()->pluck('id');
-        Atendimento::whereIn('agendamento_id', $agendamentoIds)
+        return DB::transaction(function () use ($therapySession) {
+            if ($therapySession->valor_total === null) {
+                throw new \InvalidArgumentException('Therapy session does not have a total value defined.');
+            }
+
+            $invoice = Invoice::create([
+                'patient_id' => $therapySession->patient_id,
+                'valor_total' => $therapySession->valor_total,
+                'data_emissao' => Carbon::now()->toDateString(),
+                'data_vencimento' => Carbon::now()->addDays(30)->toDateString(),
+                'status' => 'aberta',
+                'tipo' => 'sessao_completa',
+            ]);
+
+            InvoiceItem::create([
+                'invoice_id' => $invoice->id,
+                'descricao' => $therapySession->descricao . ' (' . $therapySession->total_sessoes . ' sessões)',
+                'quantidade' => $therapySession->total_sessoes,
+                'valor_unitario' => $therapySession->valor_por_sessao,
+                'valor_total' => $therapySession->valor_total,
+                'attendance_id' => null,
+                'therapy_session_id' => $therapySession->id,
+            ]);
+
+            return $invoice;
+        });
+    }
+
+    /**
+     * Mark all attendances of a session as paid via session
+     */
+    private function markSessionAttendancesAsPaid(TherapySession $therapySession): void
+    {
+        $appointmentIds = $therapySession->appointments()->pluck('id');
+        
+        Attendance::whereIn('appointment_id', $appointmentIds)
             ->update(['status_pagamento' => 'pago_via_sessao']);
     }
 
-    private function marcarAtendimentosDaSessaoComoPendentes(Sessao $sessao): void
+    /**
+     * Mark all attendances of a session as pending
+     */
+    private function markSessionAttendancesAsPending(TherapySession $therapySession): void
     {
-        $agendamentoIds = $sessao->agendamentos()->pluck('id');
-        Atendimento::whereIn('agendamento_id', $agendamentoIds)
+        $appointmentIds = $therapySession->appointments()->pluck('id');
+        
+        Attendance::whereIn('appointment_id', $appointmentIds)
             ->update(['status_pagamento' => 'pendente']);
+    }
+
+    /**
+     * Calculate outstanding balance for a patient
+     */
+    public function calculatePatientBalance(int $patientId): array
+    {
+        $totalInvoiced = Invoice::where('patient_id', $patientId)
+            ->whereIn('status', ['aberta', 'vencida'])
+            ->sum('valor_total');
+
+        $totalPaid = Payment::where('patient_id', $patientId)
+            ->where('status', 'pago')
+            ->sum('valor');
+
+        $overdueInvoices = Invoice::where('patient_id', $patientId)
+            ->where('status', 'aberta')
+            ->where('data_vencimento', '<', Carbon::now())
+            ->count();
+
+        return [
+            'total_invoiced' => $totalInvoiced,
+            'total_paid' => $totalPaid,
+            'outstanding_balance' => max(0, $totalInvoiced - $totalPaid),
+            'overdue_invoices' => $overdueInvoices,
+        ];
+    }
+
+    /**
+     * Get payment statistics for a period
+     */
+    public function getPaymentStatistics(Carbon $startDate, Carbon $endDate): array
+    {
+        $payments = Payment::where('status', 'pago')
+            ->whereBetween('data_pagamento', [$startDate, $endDate])
+            ->get();
+
+        $byMethod = $payments->groupBy('metodo_pagamento')->map(function ($group) {
+            return [
+                'count' => $group->count(),
+                'total' => $group->sum('valor'),
+            ];
+        });
+
+        return [
+            'total_amount' => $payments->sum('valor'),
+            'total_count' => $payments->count(),
+            'by_method' => $byMethod,
+            'average_amount' => $payments->count() > 0 ? $payments->avg('valor') : 0,
+        ];
     }
 }

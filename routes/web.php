@@ -133,6 +133,9 @@ Route::middleware('auth')->group(function () {
 
 // Legacy routes redirect (optional - remove after full migration)
 Route::redirect('/pacientes', '/patients')->name('pacientes.index');
+Route::redirect('/pacientes/create', '/patients')->name('pacientes.create');
 Route::redirect('/sessoes', '/therapy-sessions')->name('sessoes.index');
+Route::redirect('/sessoes/create', '/therapy-sessions')->name('sessoes.create');
 Route::redirect('/pagamentos', '/payments')->name('pagamentos.index');
+Route::redirect('/agendamentos', '/appointments')->name('agendamentos.index');
 Route::redirect('/faturas', '/invoices')->name('faturas.index');

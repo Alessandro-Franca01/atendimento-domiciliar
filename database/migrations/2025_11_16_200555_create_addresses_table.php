@@ -8,19 +8,23 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('patients', function (Blueprint $table) {
+        Schema::create('addresses', function (Blueprint $table) {
             $table->id();
-            $table->string('nome');
-            $table->string('telefone');
-            $table->string('documento')->unique();
-            $table->text('observacoes')->nullable();
-            $table->enum('status', ['ativo', 'inativo'])->default('ativo');
+            $table->unsignedBigInteger('patient_id');
+            $table->string('rua');
+            $table->string('numero');
+            $table->string('complemento')->nullable();
+            $table->string('bairro');
+            $table->string('cidade');
+            $table->string('estado');
+            $table->string('cep');
+            $table->foreign('patient_id')->references('id')->on('patients')->onDelete('cascade');
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('patients');
+        Schema::dropIfExists('addresses');
     }
 };

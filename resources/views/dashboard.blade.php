@@ -71,7 +71,10 @@
             </div>
             <div class="card-body">
                 @if($upcomingAppointments->isEmpty())
-                    <p class="text-muted">Nenhum agendamento próximo.</p>
+                    <div class="text-center py-4">
+                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Nenhum agendamento próximo.</p>
+                    </div>
                 @else
                     <div class="table-responsive">
                         <table class="table table-hover">
@@ -84,21 +87,26 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($upcomingAppointments as $agendamento)
+                                @foreach($upcomingAppointments as $appointment)
                                     <tr>
-                                        <td>{{ $agendamento->data_hora_inicio->format('d/m/Y H:i') }}</td>
-                                        <td>{{ $agendamento->patient->nome }}</td>
                                         <td>
-                                            {{ $agendamento->address->logradouro }}, {{ $agendamento->address->numero }}
-                                            <br><small class="text-muted">{{ $agendamento->address->bairro }}</small>
+                                            <strong>{{ $appointment->data_hora_inicio->format('d/m/Y') }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ $appointment->data_hora_inicio->format('H:i') }}</small>
+                                        </td>
+                                        <td>{{ $appointment->patient->nome }}</td>
+                                        <td>
+                                            {{ $appointment->address->logradouro }}, {{ $appointment->address->numero }}
+                                            <br>
+                                            <small class="text-muted">{{ $appointment->address->bairro }}</small>
                                         </td>
                                         <td>
-                                            @if($agendamento->status == 'confirmado')
+                                            @if($appointment->status == 'confirmado')
                                                 <span class="badge bg-success">Confirmado</span>
-                                            @elseif($agendamento->status == 'agendado')
+                                            @elseif($appointment->status == 'agendado')
                                                 <span class="badge bg-primary">Agendado</span>
                                             @else
-                                                <span class="badge bg-secondary">{{ ucfirst($agendamento->status) }}</span>
+                                                <span class="badge bg-secondary">{{ ucfirst($appointment->status) }}</span>
                                             @endif
                                         </td>
                                     </tr>
@@ -113,27 +121,32 @@
     
     <div class="col-md-4">
         <div class="card mb-4">
-            <div class="card-header">
+            <div class="card-header bg-warning text-dark">
                 <h5 class="mb-0">
                     <i class="fas fa-exclamation-triangle"></i> Sessões Perto de Terminar
                 </h5>
             </div>
             <div class="card-body">
                 @if($sessionsNearEnd->isEmpty())
-                    <p class="text-muted">Nenhuma sessão próxima do fim.</p>
+                    <div class="text-center py-3">
+                        <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                        <p class="text-muted mb-0">Nenhuma sessão próxima do fim.</p>
+                    </div>
                 @else
                     <div class="list-group list-group-flush">
-                        @foreach($sessionsNearEnd as $sessao)
+                        @foreach($sessionsNearEnd as $session)
                             <div class="list-group-item">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
-                                        <h6 class="mb-1">{{ $sessao->patient->nome }}</h6>
-                                        <p class="mb-1">{{ $sessao->descricao }}</p>
+                                        <h6 class="mb-1">{{ $session->patient->nome }}</h6>
+                                        <p class="mb-1 small">{{ $session->descricao }}</p>
                                         <small class="text-muted">
-                                            {{ $sessao->sessoes_realizadas }}/{{ $sessao->total_sessoes }} sessões
+                                            {{ $session->sessoes_realizadas }}/{{ $session->total_sessoes }} sessões
                                         </small>
                                     </div>
-                                    <span class="badge bg-warning">Faltam {{ $sessao->total_sessoes - $sessao->sessoes_realizadas }}</span>
+                                    <span class="badge bg-warning">
+                                        Faltam {{ $session->sessoes_restantes }}
+                                    </span>
                                 </div>
                             </div>
                         @endforeach

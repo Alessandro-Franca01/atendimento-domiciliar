@@ -51,6 +51,7 @@ class ProfessionalAuthController extends Controller
             'horario_funcionamento' => 'nullable|string',
         ]);
 
+        // dd($request->all());
         $professional = Professional::create([
             'nome' => $request->nome,
             'email' => $request->email,

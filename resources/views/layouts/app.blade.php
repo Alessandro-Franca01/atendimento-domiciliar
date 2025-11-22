@@ -25,53 +25,61 @@
                             <i class="fas fa-tachometer-alt"></i> Dashboard
                         </a>
                     </li>
+                    
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="pacientesDropdown" role="button" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="patientsDropdown" role="button" data-bs-toggle="dropdown">
                             <i class="fas fa-users"></i> Pacientes
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('pacientes.index') }}">Listar Pacientes</a></li>
-                            <li><a class="dropdown-item" href="{{ route('pacientes.create') }}">Novo Paciente</a></li>
+                            <li><a class="dropdown-item" href="{{ route('patients.index') }}">Listar Pacientes</a></li>
+                            <li><a class="dropdown-item" href="{{ route('patients.create') }}">Novo Paciente</a></li>
                         </ul>
                     </li>
+                    
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="sessoesDropdown" role="button" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="sessionsDropdown" role="button" data-bs-toggle="dropdown">
                             <i class="fas fa-calendar-check"></i> Sessões
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('sessoes.index') }}">Listar Sessões</a></li>
-                            <li><a class="dropdown-item" href="{{ route('sessoes.create') }}">Nova Sessão</a></li>
+                            <li><a class="dropdown-item" href="{{ route('therapy-sessions.index') }}">Listar Sessões</a></li>
+                            <li><a class="dropdown-item" href="{{ route('therapy-sessions.create') }}">Nova Sessão</a></li>
                         </ul>
                     </li>
+                    
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('agendamentos.index') }}">
+                        <a class="nav-link" href="{{ route('appointments.index') }}">
                             <i class="fas fa-calendar-alt"></i> Agendamentos
                         </a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="profissionaisDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-md"></i> Profissionais
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('attendances.index') }}">
+                            <i class="fas fa-file-medical"></i> Atendimentos
                         </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('profissionals.index') }}">Listar Profissionais</a></li>
-                            <li><a class="dropdown-item" href="{{ route('profissionals.create') }}">Novo Profissional</a></li>
-                        </ul>
                     </li>
+                    
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="financeiroDropdown" role="button" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="financialDropdown" role="button" data-bs-toggle="dropdown">
                             <i class="fas fa-hand-holding-dollar"></i> Financeiro
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('pagamentos.index') }}">Pagamentos</a></li>
-                            <li><a class="dropdown-item" href="{{ route('pagamentos.create') }}">Registrar Pagamento</a></li>
-                            <li><a class="dropdown-item" href="{{ route('faturas.index') }}">Faturas</a></li>
-                            <li><a class="dropdown-item" href="{{ route('faturas.mensal.create') }}">Gerar Fatura Mensal</a></li>
+                            <li><a class="dropdown-item" href="{{ route('payments.index') }}">Pagamentos</a></li>
+                            <li><a class="dropdown-item" href="{{ route('payments.create') }}">Registrar Pagamento</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ route('financeiro.fluxo-caixa') }}">Fluxo de Caixa</a></li>
-                            <li><a class="dropdown-item" href="{{ route('financeiro.relatorio-sessoes') }}">Relatório de Sessões</a></li>
-                            <li><a class="dropdown-item" href="{{ route('financeiro.relatorio-pacientes') }}">Relatório de Pacientes</a></li>
-                            <li><a class="dropdown-item" href="{{ route('financeiro.relatorio-geral') }}">Relatório Geral</a></li>
+                            <li><a class="dropdown-item" href="{{ route('invoices.index') }}">Faturas</a></li>
+                            <li><a class="dropdown-item" href="{{ route('invoices.monthly.create') }}">Gerar Fatura Mensal</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ route('financial.cash-flow') }}">Fluxo de Caixa</a></li>
+                            <li><a class="dropdown-item" href="{{ route('financial.sessions-report') }}">Relatório de Sessões</a></li>
+                            <li><a class="dropdown-item" href="{{ route('financial.patients-report') }}">Relatório de Pacientes</a></li>
+                            <li><a class="dropdown-item" href="{{ route('financial.general-report') }}">Relatório Geral</a></li>
                         </ul>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('professional.login') }}">
+                            <i class="fas fa-user-md"></i> Área Profissional
+                        </a>
                     </li>
                 </ul>
             </div>
