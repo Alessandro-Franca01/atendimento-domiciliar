@@ -4,9 +4,9 @@
 @section('page-title', 'Dashboard')
 
 @section('content')
-<div class="row">
+<div class="row g-3 g-lg-4">
     <!-- Estatísticas principais -->
-    <div class="col-lg-3 col-md-6 mb-4">
+    <div class="col-12 col-sm-6 col-lg-3 mb-3 mb-lg-4">
         <div class="stats-card text-center">
             <div class="icon bg-primary mx-auto mb-3">
                 <i class="fas fa-users"></i>
@@ -15,8 +15,8 @@
             <p class="text-muted mb-0">Total de Pacientes</p>
         </div>
     </div>
-    
-    <div class="col-lg-3 col-md-6 mb-4">
+
+    <div class="col-12 col-sm-6 col-lg-3 mb-3 mb-lg-4">
         <div class="stats-card text-center">
             <div class="icon bg-success mx-auto mb-3">
                 <i class="fas fa-clipboard-list"></i>
@@ -25,8 +25,8 @@
             <p class="text-muted mb-0">Total de Sessões</p>
         </div>
     </div>
-    
-    <div class="col-lg-3 col-md-6 mb-4">
+
+    <div class="col-12 col-sm-6 col-lg-3 mb-3 mb-lg-4">
         <div class="stats-card text-center">
             <div class="icon bg-info mx-auto mb-3">
                 <i class="fas fa-play-circle"></i>
@@ -35,8 +35,8 @@
             <p class="text-muted mb-0">Sessões Ativas</p>
         </div>
     </div>
-    
-    <div class="col-lg-3 col-md-6 mb-4">
+
+    <div class="col-12 col-sm-6 col-lg-3 mb-3 mb-lg-4">
         <div class="stats-card text-center">
             <div class="icon bg-warning mx-auto mb-3">
                 <i class="fas fa-calendar-day"></i>
@@ -47,9 +47,9 @@
     </div>
 </div>
 
-<div class="row">
+<div class="row g-4">
     <!-- Próximos agendamentos -->
-    <div class="col-lg-8 mb-4">
+    <div class="col-12 col-lg-8 mb-4">
         <div class="card">
             <div class="card-header bg-primary text-white">
                 <h5 class="mb-0">
@@ -57,6 +57,7 @@
                     Próximos Agendamentos
                 </h5>
             </div>
+
             <div class="card-body">
                 @if($upcomingAppointments->isEmpty())
                     <div class="text-center py-4">
@@ -106,18 +107,18 @@
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <a href="{{ route('professional.appointments.show', $appointment) }}" 
-                                                   class="btn btn-sm btn-outline-primary" 
+                                                <a href="{{ route('professional.appointments.show', $appointment) }}"
+                                                   class="btn btn-sm btn-outline-primary"
                                                    title="Ver Detalhes">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
                                                 @if($appointment->status == 'agendado')
-                                                    <form method="POST" 
-                                                          action="{{ route('professional.appointments.confirm', $appointment) }}" 
+                                                    <form method="POST"
+                                                          action="{{ route('professional.appointments.confirm', $appointment) }}"
                                                           class="d-inline">
                                                         @csrf
-                                                        <button type="submit" 
-                                                                class="btn btn-sm btn-outline-success" 
+                                                        <button type="submit"
+                                                                class="btn btn-sm btn-outline-success"
                                                                 title="Confirmar">
                                                             <i class="fas fa-check"></i>
                                                         </button>
@@ -139,9 +140,9 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Sessões próximas do fim -->
-    <div class="col-lg-4 mb-4">
+    <div class="col-12 col-lg-4 mb-4">
         <div class="card">
             <div class="card-header bg-warning text-dark">
                 <h5 class="mb-0">
@@ -170,7 +171,7 @@
                                     <span class="badge bg-warning">Faltam {{ $session->total_sessoes - $session->sessoes_realizadas }}</span>
                                 </div>
                                 <div class="mt-2">
-                                    <a href="{{ route('professional.sessions.show', $session) }}" 
+                                    <a href="{{ route('professional.sessions.show', $session) }}"
                                        class="btn btn-sm btn-outline-primary">
                                         Ver Detalhes
                                     </a>
@@ -181,7 +182,7 @@
                 @endif
             </div>
         </div>
-        
+
         <!-- Card de Receita Mensal -->
         <div class="card mt-4">
             <div class="card-header bg-success text-white">

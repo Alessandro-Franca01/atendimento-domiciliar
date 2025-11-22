@@ -17,7 +17,6 @@ return new class extends Migration
             $table->date('data_nascimento')->nullable();
             $table->string('convenio')->nullable();
             $table->string('numero_whatsapp')->nullable();
-            $table->string('numero_carteirinha')->nullable();
             $table->text('observacoes')->nullable();
             $table->enum('status', ['ativo', 'inativo'])->default('ativo');
             $table->timestamps();
