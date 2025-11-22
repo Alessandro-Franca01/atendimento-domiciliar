@@ -28,10 +28,10 @@
                 <thead class="table-light">
                     <tr>
                         <th>Paciente</th>
-                        <th>Contato</th>
-                        <th>CPF</th>
-                        <th>Endereço</th>
-                        <th>Sessões</th>
+                        <th class="d-none d-sm-table-cell">Contato</th>
+                        <th class="d-none d-md-table-cell">CPF</th>
+                        <th class="d-none d-lg-table-cell">Endereço</th>
+                        <th class="text-end">Sessões</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
@@ -41,16 +41,23 @@
                             <td>
                                 <div class="fw-bold">{{ $patient->nome }}</div>
                                 @if(!empty($patient->email))
-                                    <small class="text-muted">{{ $patient->email }}</small>
+                                    <small class="text-muted d-block">{{ $patient->email }}</small>
                                 @endif
+                                <!-- Mobile: Contato info inline -->
+                                <div class="d-sm-none">
+                                    <small class="text-muted d-block">{{ $patient->telefone ?? '—' }}</small>
+                                    @if(!empty($patient->cpf))
+                                        <small class="text-muted d-block">{{ $patient->cpf }}</small>
+                                    @endif
+                                </div>
                             </td>
-                            <td>
+                            <td class="d-none d-sm-table-cell">
                                 <small class="text-muted">{{ $patient->telefone ?? '—' }}</small>
                             </td>
-                            <td>
+                            <td class="d-none d-md-table-cell">
                                 <small class="text-muted">{{ $patient->cpf ?? '—' }}</small>
                             </td>
-                            <td>
+                            <td class="d-none d-lg-table-cell">
                                 @php
                                     $primary = $patient->addresses->firstWhere('principal', true) ?? $patient->addresses->first();
                                 @endphp
@@ -64,15 +71,19 @@
                                     <span class="text-muted small">—</span>
                                 @endif
                             </td>
-                            <td>
+                            <td class="text-end">
                                 <span class="badge bg-secondary">{{ $patient->therapySessions->count() ?? 0 }}</span>
                             </td>
                             <td>
-                                <div class="btn-group btn-group-sm" role="group">
-                                    <a href="{{ route('professional.patients.show', $patient) }}" class="btn btn-outline-primary" title="Visualizar">
+                                <div class="btn-group btn-group-sm flex-wrap" role="group">
+                                    <a href="{{ route('professional.patients.show', $patient) }}" 
+                                       class="btn btn-outline-primary" 
+                                       title="Visualizar">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="{{ route('professional.patients.edit', $patient) }}" class="btn btn-outline-secondary" title="Editar">
+                                    <a href="{{ route('professional.patients.edit', $patient) }}" 
+                                       class="btn btn-outline-secondary d-none d-sm-inline-block" 
+                                       title="Editar">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 </div>

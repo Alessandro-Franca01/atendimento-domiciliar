@@ -39,22 +39,22 @@
             <table class="table table-hover table-striped mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 15%;">
+                        <th>
                             <i class="fas fa-user"></i> Paciente
                         </th>
-                        <th style="width: 20%;">
+                        <th class="d-none d-md-table-cell">
                             <i class="fas fa-calendar"></i> Data/Hora
                         </th>
-                        <th style="width: 15%;">
+                        <th class="d-none d-lg-table-cell">
                             <i class="fas fa-map-marker-alt"></i> Local
                         </th>
-                        <th style="width: 15%;">
+                        <th class="d-none d-lg-table-cell">
                             <i class="fas fa-heartbeat"></i> Sessão
                         </th>
-                        <th style="width: 15%;">
+                        <th>
                             <span class="badge bg-secondary">Status</span>
                         </th>
-                        <th style="width: 20%;">
+                        <th>
                             <i class="fas fa-cogs"></i> Ações
                         </th>
                     </tr>
@@ -63,16 +63,19 @@
                     @foreach ($appointments as $appointment)
                         <tr>
                             <td>
-                                <div class="d-flex align-items-center">
-                                    <div>
-                                        <p class="mb-0 fw-bold">{{ $appointment->patient->nome }}</p>
-                                        <small class="text-muted">
-                                            {{ $appointment->patient->cpf }}
+                                <div>
+                                    <p class="mb-0 fw-bold">{{ $appointment->patient->nome }}</p>
+                                    <small class="text-muted">
+                                        {{ $appointment->patient->cpf }}
+                                    </small>
+                                    <div class="d-md-none mt-2">
+                                        <small class="d-block text-muted">
+                                            <strong>{{ \Carbon\Carbon::parse($appointment->data_hora_inicio)->format('d/m/Y H:i') }}</strong>
                                         </small>
                                     </div>
                                 </div>
                             </td>
-                            <td>
+                            <td class="d-none d-md-table-cell">
                                 <div>
                                     <p class="mb-0">
                                         <strong>{{ \Carbon\Carbon::parse($appointment->data_hora_inicio)->format('d/m/Y') }}</strong>
@@ -83,7 +86,7 @@
                                     </small>
                                 </div>
                             </td>
-                            <td>
+                            <td class="d-none d-lg-table-cell">
                                 @if ($appointment->address)
                                     <small>
                                         {{ $appointment->address->rua }}, {{ $appointment->address->numero }}<br>
@@ -93,7 +96,7 @@
                                     <span class="text-muted small">—</span>
                                 @endif
                             </td>
-                            <td>
+                            <td class="d-none d-lg-table-cell">
                                 @if ($appointment->therapySession)
                                     <small>{{ $appointment->therapySession->tipo_sessao }}</small>
                                 @else
@@ -116,14 +119,14 @@
                                 </span>
                             </td>
                             <td>
-                                <div class="btn-group btn-group-sm" role="group">
+                                <div class="btn-group btn-group-sm flex-wrap" role="group">
                                     <a href="{{ route('professional.appointments.show', $appointment) }}" 
                                        class="btn btn-outline-primary" 
                                        title="Visualizar">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                     <a href="{{ route('professional.appointments.edit', $appointment) }}" 
-                                       class="btn btn-outline-secondary" 
+                                       class="btn btn-outline-secondary d-none d-sm-inline-block" 
                                        title="Editar">
                                         <i class="fas fa-edit"></i>
                                     </a>

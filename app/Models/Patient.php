@@ -17,7 +17,6 @@ class Patient extends Model
         'data_nascimento',
         'convenio',
         'numero_whatsapp',
-        'numero_carteirinha',
         'observacoes',
         'status'
     ];

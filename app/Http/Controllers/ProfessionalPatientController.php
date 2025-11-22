@@ -42,7 +42,6 @@ class ProfessionalPatientController extends Controller
             'cpf' => 'nullable|string|max:20|unique:patients,cpf',
             'numero_whatsapp' => 'nullable|string|max:20',
             'convenio' => 'nullable|string|max:100',
-            'numero_carteirinha' => 'nullable|string|max:50',
             'observacoes' => 'nullable|string',
             'endereco' => 'required|array',
             'endereco.cep' => 'required|string|max:10',
@@ -62,7 +61,6 @@ class ProfessionalPatientController extends Controller
             'cpf' => $request->cpf,
             'numero_whatsapp' => $request->numero_whatsapp,
             'convenio' => $request->convenio,
-            'numero_carteirinha' => $request->numero_carteirinha,
             'observacoes' => $request->observacoes,
         ]);
 
@@ -134,7 +132,6 @@ class ProfessionalPatientController extends Controller
             'cpf' => 'nullable|string|max:20|unique:patients,cpf,' . $patient->id,
             'numero_whatsapp' => 'nullable|string|max:20',
             'convenio' => 'nullable|string|max:100',
-            'numero_carteirinha' => 'nullable|string|max:50',
             'observacoes' => 'nullable|string',
         ]);
 
@@ -146,7 +143,6 @@ class ProfessionalPatientController extends Controller
             'cpf' => $request->cpf,
             'numero_whatsapp' => $request->numero_whatsapp,
             'convenio' => $request->convenio,
-            'numero_carteirinha' => $request->numero_carteirinha,
             'observacoes' => $request->observacoes,
         ]);
 
